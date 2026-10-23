@@ -1,0 +1,299 @@
+{
+  "info": {
+    "name": "NEXO — Dados de teste Java Sprint 1 V2",
+    "description": "Dados técnicos de teste reutilizados da coleção CRUD. Cria um cenário, alternativas A/B, um Mito ou Fato e uma decisão fictícia, sem exclusão automática. Conteúdo demonstrativo, não catálogo científico final nem DML da disciplina Database. Executar uma vez por carga em ambiente autorizado; repetir cria novos registros. Definir adminToken apenas no ambiente local do Postman. A carga não foi executada no Oracle nesta etapa.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://127.0.0.1:8080",
+      "type": "string"
+    },
+    {
+      "key": "scenarioId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "alternativeId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "alternativeBId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "decisionId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "mythId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Criar cenário",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('retorna 201 Created', function () { pm.response.to.have.status(201); });",
+              "pm.test('retorna cenário com ID', function () { const body = pm.response.json(); pm.expect(body.id).to.be.a('number'); pm.collectionVariables.set('scenarioId', String(body.id)); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"titulo\": \"Como esterilizar materiais médicos sensíveis ao calor?\",\n  \"categoria\": \"SAUDE\",\n  \"situacao\": \"Em um hospital fictício, uma equipe compara opções para esterilizar dispositivos médicos sensíveis ao calor.\",\n  \"objetivoEducacional\": \"Comparar a esterilização por radiação com óxido de etileno e reconhecer que a adequação depende do material e de processos validados.\",\n  \"fonteUrl\": \"https://nucleus.iaea.org/sites/diif/Pages/GammaRT.aspx\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": "{{baseUrl}}/cenarios"
+      },
+      "response": []
+    },
+    {
+      "name": "Criar alternativa",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('retorna 201 Created', function () { pm.response.to.have.status(201); });",
+              "pm.test('retorna alternativa com ID', function () { const body = pm.response.json(); pm.expect(body.id).to.be.a('number'); pm.collectionVariables.set('alternativeId', String(body.id)); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"cenarioId\": {{scenarioId}},\n  \"rotulo\": \"A\",\n  \"descricao\": \"Investigar a aplicação da radiação na esterilização de produtos médicos, inclusive dispositivos que podem ser sensíveis ao calor.\",\n  \"feedback\": \"A esterilização por radiação é uma aplicação industrial para produtos médicos. A compatibilidade do material e a validação do processo precisam ser avaliadas por profissionais; esta missão não orienta procedimentos.\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": "{{baseUrl}}/alternativas"
+      },
+      "response": []
+    },
+    {
+      "name": "Criar alternativa B pela rota do cenário",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('retorna 201 Created', function () { pm.response.to.have.status(201); });",
+              "pm.test('retorna alternativa com ID', function () { const body = pm.response.json(); pm.expect(body.id).to.be.a('number'); pm.collectionVariables.set('alternativeBId', String(body.id)); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"rotulo\": \"B\",\n  \"descricao\": \"Investigar óxido de etileno e a compatibilidade do processo com o material do dispositivo.\",\n  \"feedback\": \"A comparação deve considerar as características do produto e processos validados. Esta missão não fornece orientação para esterilização clínica.\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": "{{baseUrl}}/cenarios/{{scenarioId}}/alternativas"
+      },
+      "response": []
+    },
+    {
+      "name": "Criar Mito ou Fato",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status 201', function () { pm.response.to.have.status(201); });",
+              "if (pm.response.code === 201) { pm.collectionVariables.set('mythId', String(pm.response.json().id)); }"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/mitos-fatos",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"cenarioId\": {{scenarioId}},\n  \"afirmacao\": \"A escolha de uma tecnologia depende da aplicação e das suas limitações.\",\n  \"classificacao\": \"FATO\",\n  \"explicacao\": \"Exemplo de formato: comparar finalidade, condições de uso e limitações. A fonte e o conteúdo final serão conferidos no módulo DADOS.\",\n  \"fonteUrl\": \"https://www.gov.br/amazul\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Abrir cenário completo para o jogo",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status 200', function () { pm.response.to.have.status(200); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/cenarios/{{scenarioId}}/jogo",
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Criar decisão fictícia",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('retorna 201 Created', function () { pm.response.to.have.status(201); });",
+              "pm.test('retorna decisão com ID e data e hora local sem fuso', function () { const body = pm.response.json(); pm.expect(body.id).to.be.a('number'); pm.expect(body.dataEscolha).to.be.a('string'); pm.collectionVariables.set('decisionId', String(body.id)); pm.collectionVariables.set('originalDecisionTimestamp', body.dataEscolha); pm.collectionVariables.set('decisionCreatedBody', JSON.stringify(body)); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"alternativaId\": {{alternativeId}},\n  \"apelido\": \"Visitante Demo\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": "{{baseUrl}}/decisoes",
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Consultar descoberta compartilhada por A e B",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status 200', function () { pm.response.to.have.status(200); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/cenarios/{{scenarioId}}/mitos-fatos",
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Buscar cenários por título",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('retorna 200 OK', function () { pm.response.to.have.status(200); });",
+              "pm.test('retorna envelope paginado', function () { pm.expect(pm.response.json().content).to.be.an('array'); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/cenarios/busca?texto=esterilizar&page=0&size=10",
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "response": []
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{adminToken}}",
+        "type": "string"
+      }
+    ]
+  }
+}
