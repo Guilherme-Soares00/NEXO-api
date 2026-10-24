@@ -57,6 +57,25 @@ class PostmanSeedContractTest {
         }
     }
 
+    @Test
+    void providesSpecificEducationalContentWithInstitutionalSources() throws Exception {
+        var mapper = new ObjectMapper();
+        JsonNode collection = mapper.readTree(Files.readString(Path.of("requests/NEXO.dados-teste.postman_collection.json")));
+        List<JsonNode> requests = new ArrayList<>();
+        flatten(collection.path("item"), requests);
+        for (var item : requests) {
+            String raw = item.path("request").path("body").path("raw").asText();
+            assertThat(raw).doesNotContain("Exemplo de formato", "módulo DADOS", "serão conferidos");
+            String url = item.path("request").path("url").asText();
+            if (url.endsWith("/mitos-fatos") && item.path("request").path("method").asText().equals("POST")) {
+                JsonNode body = mapper.readTree(raw.replace("{{scenarioId}}", "1"));
+                assertThat(body.path("afirmacao").asText()).containsIgnoringCase("radiação").containsIgnoringCase("esterilizar");
+                assertThat(body.path("classificacao").asText()).isEqualTo("FATO");
+                assertThat(body.path("fonteUrl").asText()).isEqualTo("https://www.iaea.org/topics/medical-sterilization");
+            }
+        }
+    }
+
     private void flatten(JsonNode items, List<JsonNode> requests) {
         for (var item : items) {
             if (item.has("request")) requests.add(item);

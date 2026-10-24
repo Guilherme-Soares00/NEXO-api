@@ -65,7 +65,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"titulo\": \"Como esterilizar materiais médicos sensíveis ao calor?\",\n  \"categoria\": \"SAUDE\",\n  \"situacao\": \"Em um hospital fictício, uma equipe compara opções para esterilizar dispositivos médicos sensíveis ao calor.\",\n  \"objetivoEducacional\": \"Comparar a esterilização por radiação com óxido de etileno e reconhecer que a adequação depende do material e de processos validados.\",\n  \"fonteUrl\": \"https://nucleus.iaea.org/sites/diif/Pages/GammaRT.aspx\"\n}",
+              "raw": "{\n  \"titulo\": \"Como esterilizar produtos médicos já embalados?\",\n  \"categoria\": \"SAUDE\",\n  \"situacao\": \"Uma fabricante fictícia prepara seringas descartáveis para distribuição. A equipe compara métodos de esterilização e estuda como a radiação pode atuar em produtos já embalados, sem presumir que um método sirva para todo material.\",\n  \"objetivoEducacional\": \"Reconhecer a esterilização por radiação como aplicação nuclear civil e comparar seu uso com óxido de etileno, considerando a compatibilidade do produto e processos validados.\",\n  \"fonteUrl\": \"https://www.iaea.org/topics/medical-sterilization\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -157,7 +157,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('retorna 200 OK', function () { pm.response.to.have.status(200); });",
-                  "pm.test('reflete o título atualizado', function () { pm.expect(pm.response.json().titulo).to.eql('Como comparar processos de esterilização de materiais médicos?'); });"
+                  "pm.test('reflete o título atualizado', function () { const sent = JSON.parse(pm.variables.replaceIn(pm.request.body.raw)); pm.expect(pm.response.json().titulo).to.eql(sent.titulo); });"
                 ]
               }
             }
@@ -172,7 +172,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"titulo\": \"Como comparar processos de esterilização de materiais médicos?\",\n  \"categoria\": \"SAUDE\",\n  \"situacao\": \"Em um hospital fictício, uma equipe compara opções para esterilizar dispositivos médicos sensíveis ao calor.\",\n  \"objetivoEducacional\": \"Comparar a esterilização por radiação com óxido de etileno e reconhecer que a adequação depende do material e de processos validados.\",\n  \"fonteUrl\": \"https://nucleus.iaea.org/sites/diif/Pages/GammaRT.aspx\"\n}",
+              "raw": "{\n  \"titulo\": \"Como comparar processos de esterilização de produtos médicos?\",\n  \"categoria\": \"SAUDE\",\n  \"situacao\": \"Uma fabricante fictícia prepara seringas descartáveis para distribuição. A equipe compara métodos de esterilização e estuda como a radiação pode atuar em produtos já embalados, sem presumir que um método sirva para todo material.\",\n  \"objetivoEducacional\": \"Reconhecer a esterilização por radiação como aplicação nuclear civil e comparar seu uso com óxido de etileno, considerando a compatibilidade do produto e processos validados.\",\n  \"fonteUrl\": \"https://www.iaea.org/topics/medical-sterilization\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -294,7 +294,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"cenarioId\": {{scenarioId}},\n  \"rotulo\": \"A\",\n  \"descricao\": \"Investigar a aplicação da radiação na esterilização de produtos médicos, inclusive dispositivos que podem ser sensíveis ao calor.\",\n  \"feedback\": \"A esterilização por radiação é uma aplicação industrial para produtos médicos. A compatibilidade do material e a validação do processo precisam ser avaliadas por profissionais; esta missão não orienta procedimentos.\"\n}",
+              "raw": "{\n  \"cenarioId\": {{scenarioId}},\n  \"rotulo\": \"A\",\n  \"descricao\": \"Estudar o uso de radiação ionizante para esterilizar produtos médicos já embalados.\",\n  \"feedback\": \"Segundo a AIEA, a radiação é usada na esterilização de produtos médicos descartáveis, como seringas e luvas, inclusive já embalados. A escolha do processo exige avaliação do produto; o cenário é educativo e não orienta procedimentos clínicos.\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -329,7 +329,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"rotulo\": \"B\",\n  \"descricao\": \"Investigar óxido de etileno e a compatibilidade do processo com o material do dispositivo.\",\n  \"feedback\": \"A comparação deve considerar as características do produto e processos validados. Esta missão não fornece orientação para esterilização clínica.\"\n}",
+              "raw": "{\n  \"rotulo\": \"B\",\n  \"descricao\": \"Estudar o uso de óxido de etileno como método químico de esterilização e comparar suas condições de aplicação.\",\n  \"feedback\": \"A FDA informa que o óxido de etileno é utilizado por fabricantes para esterilizar dispositivos médicos e pode ser necessário para certos materiais ou formatos. O processo deve ser validado e seus resíduos controlados. Nenhum dos métodos é uma solução universal. Referência: https://www.fda.gov/medical-devices/general-hospital-devices-and-supplies/sterilization-medical-devices\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -397,7 +397,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('retorna 200 OK', function () { pm.response.to.have.status(200); });",
-                  "pm.test('reflete a descrição atualizada', function () { pm.expect(pm.response.json().descricao).to.eql('Investigar a aplicação da radiação na esterilização de produtos médicos sensíveis ao calor e a validação do processo.'); });"
+                  "pm.test('reflete a descrição atualizada', function () { const sent = JSON.parse(pm.variables.replaceIn(pm.request.body.raw)); pm.expect(pm.response.json().descricao).to.eql(sent.descricao); });"
                 ]
               }
             }
@@ -412,7 +412,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"cenarioId\": {{scenarioId}},\n  \"rotulo\": \"A\",\n  \"descricao\": \"Investigar a aplicação da radiação na esterilização de produtos médicos sensíveis ao calor e a validação do processo.\",\n  \"feedback\": \"A esterilização por radiação é uma aplicação industrial para produtos médicos. A compatibilidade do material e a validação do processo precisam ser avaliadas por profissionais; esta missão não orienta procedimentos.\"\n}",
+              "raw": "{\n  \"cenarioId\": {{scenarioId}},\n  \"rotulo\": \"A\",\n  \"descricao\": \"Estudar o uso de radiação ionizante para esterilizar produtos médicos já embalados.\",\n  \"feedback\": \"Segundo a AIEA, a radiação é usada na esterilização de produtos médicos descartáveis, como seringas e luvas, inclusive já embalados. A escolha do processo exige avaliação do produto; o cenário é educativo e não orienta procedimentos clínicos.\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -453,7 +453,7 @@
             "url": "{{baseUrl}}/mitos-fatos",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"cenarioId\": {{scenarioId}},\n  \"afirmacao\": \"A escolha de uma tecnologia depende da aplicação e das suas limitações.\",\n  \"classificacao\": \"FATO\",\n  \"explicacao\": \"Exemplo de formato: comparar finalidade, condições de uso e limitações. A fonte e o conteúdo final serão conferidos no módulo DADOS.\",\n  \"fonteUrl\": \"https://www.gov.br/amazul\"\n}",
+              "raw": "{\n  \"cenarioId\": {{scenarioId}},\n  \"afirmacao\": \"A radiação ionizante é usada para esterilizar produtos médicos, inclusive já embalados.\",\n  \"classificacao\": \"FATO\",\n  \"explicacao\": \"A AIEA descreve a esterilização por radiação de dispositivos médicos de uso único, como seringas e luvas cirúrgicas. Uma vantagem é tratar produtos já embalados. Essa aplicação industrial não substitui a avaliação profissional da compatibilidade do produto nem constitui orientação clínica.\",\n  \"fonteUrl\": \"https://www.iaea.org/topics/medical-sterilization\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -533,7 +533,7 @@
             "url": "{{baseUrl}}/mitos-fatos/{{mythId}}",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"cenarioId\": {{scenarioId}},\n  \"afirmacao\": \"A comparação deve considerar benefícios e limitações das opções.\",\n  \"classificacao\": \"FATO\",\n  \"explicacao\": \"Exemplo de formato: comparar finalidade, condições de uso e limitações. A fonte e o conteúdo final serão conferidos no módulo DADOS.\",\n  \"fonteUrl\": \"https://www.gov.br/amazul\"\n}",
+              "raw": "{\n  \"cenarioId\": {{scenarioId}},\n  \"afirmacao\": \"A radiação permite esterilizar certos produtos médicos sem abrir sua embalagem final.\",\n  \"classificacao\": \"FATO\",\n  \"explicacao\": \"A AIEA descreve a esterilização por radiação de dispositivos médicos de uso único, como seringas e luvas cirúrgicas. Uma vantagem é tratar produtos já embalados. Essa aplicação industrial não substitui a avaliação profissional da compatibilidade do produto nem constitui orientação clínica.\",\n  \"fonteUrl\": \"https://www.iaea.org/topics/medical-sterilization\"\n}",
               "options": {
                 "raw": {
                   "language": "json"

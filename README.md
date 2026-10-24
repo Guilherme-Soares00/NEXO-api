@@ -52,6 +52,8 @@ mvn verify -Poracle-it
 
 A integração exige schema Oracle de testes separado e vazio. Na execução registrada, `mvn -B -ntp clean verify -Poracle-it` passou com 145 testes locais e 144 testes Oracle, sem falhas, erros ou ignorados. A API empacotada também passou por 46 verificações HTTP reais, incluindo persistência confirmada por outra conexão JDBC. Os testes removem somente os IDs que criam; as quatro tabelas ficaram vazias ao final. Evidências e limites em [README.md#testes-e-resultados](README.md#testes-e-resultados).
 
+Na atualização dos dados educativos, `mvn verify` foi executado novamente: **146 testes locais aprovados**, sem falhas. As duas coleções Postman também passaram no Newman contra Oracle real, conforme [README.md#dados-para-teste](README.md#dados-para-teste). Os 144 testes de integração Oracle citados acima pertencem à execução anterior.
+
 ## Executar a API
 
 Configure as variáveis abaixo no ambiente do processo:
@@ -110,7 +112,7 @@ Geração local do token, matriz de acesso, Swagger, Postman, rotação e limite
 - [Histórico de evidências](README.md#testes-e-resultados)
 - [Fontes institucionais](README.md#dados-para-teste)
 
-A coleção [requests/NEXO.postman_collection.json](requests/NEXO.postman_collection.json) acompanha o CRUD, captura IDs e exclui os registros de exemplo ao terminar. Para manter os dados de teste, usar [requests/NEXO.dados-teste.postman_collection.json](requests/NEXO.dados-teste.postman_collection.json): cria um cenário, alternativas A/B, um Mito ou Fato e uma decisão fictícia, sem limpeza automática. Os exemplos são técnicos e não substituem o catálogo científico final, a revisão de fontes ou a carga DML de Database. Consulte [README.md#dados-para-teste](README.md#dados-para-teste). As coleções ainda não foram executadas pelo Runner do Postman; as verificações HTTP registradas acima usaram um roteiro separado.
+A coleção [requests/NEXO.postman_collection.json](requests/NEXO.postman_collection.json) acompanha o CRUD, captura IDs e exclui os registros de exemplo ao terminar. Para manter os dados de teste, usar [requests/NEXO.dados-teste.postman_collection.json](requests/NEXO.dados-teste.postman_collection.json): cria um cenário, alternativas A/B, um Mito ou Fato e uma decisão fictícia, sem limpeza automática. O exemplo de Saúde contém um cenário educativo específico, alternativas fundamentadas em fontes AIEA/FDA e um Fato sobre esterilização por radiação. As duas coleções foram executadas via Newman com Oracle real: carga de demonstração com 8 requisições e 18 asserções; CRUD com 29 requisições e 45 asserções, sem falhas. Os dados de demonstração foram mantidos. Esse exemplo não substitui a carga DML de Database nem um catálogo de todas as categorias. Consulte [README.md#dados-para-teste](README.md#dados-para-teste).
 
 Docker/Azure e seus materiais de entrega têm escopo próprio. Nenhum recurso de nuvem foi provisionado nesta validação Java. Contas individuais, login, ranking, painel e interfaces de outras disciplinas não integram a API atual; a administração é protegida pelo token compartilhado autorizado.
 
