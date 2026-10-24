@@ -18,7 +18,8 @@ public class OpenApiConfiguration {
                 .title("NEXO - Laboratório de Decisões")
                 .version("1.0.0")
                 .description("API educativa do Challenge FIAP ADS 2026, empresa parceira AMAZUL. "
-                        + "Gerencia cenários, alternativas e decisões sobre aplicações civis da tecnologia nuclear. "
-                        + "As situações e os apelidos de demonstração são fictícios. Não há contas ou autenticação nesta etapa."));
+                        + "Gerencia cenários, alternativas, decisões e mitos e fatos sobre aplicações civis da tecnologia nuclear. "
+                        + "As situações e os apelidos de demonstração são fictícios. Não há contas individuais. "
+                        + "As operações administrativas exigem token Bearer; o catálogo e o registro de decisões são públicos."));
     }
 }

@@ -72,6 +72,18 @@ class OpenApiTest {
     }
 
     @Test
+    void descriptionExplainsAllResourcesAndAdministrativeAuthentication() throws Exception {
+        JsonNode document = mapper.readTree(mvc.perform(get("/v3/api-docs"))
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsByteArray());
+        assertThat(document.path("info").path("description").asText())
+                .contains("cenários, alternativas, decisões e mitos e fatos")
+                .contains("operações administrativas exigem token Bearer")
+                .contains("catálogo e o registro de decisões são públicos")
+                .contains("Não há contas individuais")
+                .doesNotContain("Não há contas ou autenticação");
+    }
+
+    @Test
     void servesSwaggerUi() throws Exception {
         mvc.perform(get("/swagger-ui/index.html"))
                 .andExpect(status().isOk())
