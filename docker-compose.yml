@@ -1,0 +1,41 @@
+name: nexo
+
+services:
+  api:
+    image: nexo-api:local
+    build:
+      context: .
+      dockerfile: Dockerfile
+    init: true
+    restart: "no"
+    ports:
+      - "127.0.0.1:${API_PORT:-8081}:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: oracle
+      SERVER_ADDRESS: 0.0.0.0
+      SERVER_PORT: "8080"
+      ORACLE_JDBC_URL: ${ORACLE_JDBC_URL:?Defina ORACLE_JDBC_URL no ambiente do Docker}
+      APP_USER: ${APP_USER:?Defina APP_USER no ambiente do Docker}
+      APP_USER_PASSWORD: ${APP_USER_PASSWORD:?Defina APP_USER_PASSWORD no ambiente do Docker}
+      NEXO_ADMIN_TOKEN: ${NEXO_ADMIN_TOKEN:?Defina NEXO_ADMIN_TOKEN no ambiente do Docker}
+    networks:
+      - nexo-network
+    read_only: true
+    tmpfs:
+      - /tmp:rw,nosuid,size=64m
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 768m
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8080/cenarios?page=0&size=1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 90s
+
+networks:
+  nexo-network:
+    name: nexo-network
+    driver: bridge
