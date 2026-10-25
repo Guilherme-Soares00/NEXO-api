@@ -114,6 +114,14 @@ Geração local do token, matriz de acesso, Swagger, Postman, rotação e limite
 
 A coleção [requests/NEXO.postman_collection.json](requests/NEXO.postman_collection.json) acompanha o CRUD, captura IDs e exclui os registros de exemplo ao terminar. Para manter os dados de teste, usar [requests/NEXO.dados-teste.postman_collection.json](requests/NEXO.dados-teste.postman_collection.json): cria um cenário, alternativas A/B, um Mito ou Fato e uma decisão fictícia, sem limpeza automática. O exemplo de Saúde contém um cenário educativo específico, alternativas fundamentadas em fontes AIEA/FDA e um Fato sobre esterilização por radiação. As duas coleções foram executadas via Newman com Oracle real: carga de demonstração com 8 requisições e 18 asserções; CRUD com 29 requisições e 45 asserções, sem falhas. Os dados de demonstração foram mantidos. Esse exemplo não substitui a carga DML de Database nem um catálogo de todas as categorias. Consulte [README.md#dados-para-teste](README.md#dados-para-teste).
 
-Docker/Azure e seus materiais de entrega têm escopo próprio. Nenhum recurso de nuvem foi provisionado nesta validação Java. Contas individuais, login, ranking, painel e interfaces de outras disciplinas não integram a API atual; a administração é protegida pelo token compartilhado autorizado.
+## Docker e Oracle externo
+
+A API pode ser compilada e executada em container com Java 25, mantendo o Oracle externo do grupo. O Dockerfile usa múltiplos estágios e usuário sem privilégios administrativos; o Compose publica a API somente em `127.0.0.1:8081`, sem interferir na porta padrão do IntelliJ.
+
+Preparação do `.env.docker`, build, execução, verificação e limites da validação: [Docker](docs/docker.md). O arquivo [docker.env.example](docker.env.example) não contém credenciais; o arquivo local `.env.docker` é ignorado pelo Git e excluído do contexto de build.
+
+Docker padroniza o empacotamento e a execução da API. Cloud Computing permitirá hospedar essa imagem em uma VM Azure, acessando o mesmo Oracle autorizado. Nenhum recurso de nuvem foi provisionado nesta etapa; a entrega DevOps ainda exige execução na VM criada por Azure CLI e seus materiais de comprovação.
+
+Contas individuais, login, ranking, painel e interfaces de outras disciplinas não integram a API atual; a administração é protegida pelo token compartilhado autorizado.
 
 Situações, apelidos e decisões de demonstração são fictícios. Conteúdo de saúde é educativo.
