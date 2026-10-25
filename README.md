@@ -2,7 +2,17 @@
 
 API educativa para explorar aplicações civis da tecnologia nuclear em saúde, agricultura, indústria, pesquisa e energia. O estudante consulta um cenário, compara alternativas, registra uma decisão e acessa explicações e itens de mito ou fato.
 
-Projeto acadêmico do Challenge FIAP ADS 2026, desenvolvido para Java Advanced. O contexto do desafio envolve a AMAZUL e a Marinha; o NEXO não é um produto oficial dessas instituições.
+Projeto acadêmico do Challenge FIAP ADS 2026, com entregas de Java Advanced e DevOps & Cloud. O contexto do desafio envolve a AMAZUL e a Marinha; o NEXO não é um produto oficial dessas instituições.
+
+## Acesso rápido por disciplina
+
+| Quero fazer | Guia |
+| --- | --- |
+| Executar a API no IntelliJ/Maven | [Execução Java](#executar-a-api) |
+| Entender o contrato HTTP e o Oracle | [API](README.md#java-advanced) · [Oracle](README.md#banco-oracle) |
+| Executar em container no computador | [Docker local](docs/docker.md) |
+| Planejar a VM sem criar recursos | [Azure e scripts](docs/azure.md#planejamento-seguro) |
+| Excluir e comprovar a limpeza após a demonstração | [Exclusão dos recursos](docs/azure.md#exclusão-e-comprovação) |
 
 Turma: 2TDSPB
 
@@ -121,6 +131,15 @@ A API pode ser compilada e executada em container com Java 25, mantendo o Oracle
 Preparação do `.env.docker`, build, execução, verificação e limites da validação: [Docker](docs/docker.md). O arquivo [docker.env.example](docker.env.example) não contém credenciais; o arquivo local `.env.docker` é ignorado pelo Git e excluído do contexto de build.
 
 Docker padroniza o empacotamento e a execução da API. Cloud Computing permitirá hospedar essa imagem em uma VM Azure, acessando o mesmo Oracle autorizado. Nenhum recurso de nuvem foi provisionado nesta etapa; a entrega DevOps ainda exige execução na VM criada por Azure CLI e seus materiais de comprovação.
+
+## Azure: planejamento antes de gastar créditos
+
+Os scripts `.sh` de criação da VM, instalação do Docker e exclusão do grupo estão preparados. **Por padrão, eles apenas planejam: não criam recursos, não excluem recursos e não instalam pacotes.** A execução real exige `--executar`; o provisionamento e a exclusão exigem também confirmações explícitas diferentes.
+
+- [Guia Azure, acesso à VM e comprovação da exclusão](docs/azure.md)
+- [Parâmetros de exemplo, sem segredos](azure.env.example)
+
+A preparação foi validada localmente, com comandos Azure simulados e consultas reais somente de leitura. **Nenhum recurso Azure foi provisionado.** O deploy na VM, o acesso Azure → Oracle e a exclusão real ainda precisam ser demonstrados.
 
 Contas individuais, login, ranking, painel e interfaces de outras disciplinas não integram a API atual; a administração é protegida pelo token compartilhado autorizado.
 
