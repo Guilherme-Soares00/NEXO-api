@@ -176,6 +176,6 @@ Alterações de dados feitas pela API continuam no Oracle independentemente da r
 
 O Compose atual mantém a publicação em loopback para testes locais e acesso administrativo protegido. Não basta copiá-lo para a VM e esperar acesso público direto.
 
-Na etapa Azure, definir o acesso remoto seguro, regras de rede, conectividade da VM com o Oracle FIAP, VM criada por script `.sh` com Azure CLI e instalação do Docker. Não enviar o token administrativo por HTTP público. A aplicação precisa ser demonstrada em execução na VM, não apenas localmente.
+Os scripts de provisionamento, instalação e exclusão e o guia de acesso remoto estão preparados em [Azure](azure.md). A execução real, a configuração na VM e a conectividade com o Oracle ainda dependem da sessão autorizada. Não enviar o token administrativo por HTTP público. A aplicação precisa ser demonstrada em execução na VM, não apenas localmente.
 
-Ainda serão entregues o diagrama com ícones dos serviços efetivos, README de provisionamento, vídeo de aproximadamente três minutos em 720p ou superior, PDF final e comprovação da exclusão do grupo de recursos.
+Ainda serão entregues o diagrama com ícones dos serviços efetivos, o vídeo de aproximadamente três minutos em 720p ou superior, o PDF final e a comprovação da exclusão do grupo de recursos.

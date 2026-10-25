@@ -1,0 +1,2 @@
+*.sh text eol=lf
+azure.env.example text eol=lf

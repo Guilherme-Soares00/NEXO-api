@@ -1,0 +1,4 @@
+services:
+  api:
+    ports: !override
+      - "0.0.0.0:${AZURE_API_PORT:-8080}:8080"
