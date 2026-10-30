@@ -264,11 +264,6 @@ A preparação foi validada localmente, com comandos Azure simulados e consultas
 
 O [guia de arquitetura](docs/arquitetura-devops.md) explica os componentes e apresenta o diagrama em PNG.
 
-
-
-
-O desenho corresponde ao planejamento atual. Antes da gravação, conferir os recursos efetivamente usados e atualizar qualquer diferença. A implantação Azure ainda não foi executada.
-
 ---
 
 ## Escopo e observações
