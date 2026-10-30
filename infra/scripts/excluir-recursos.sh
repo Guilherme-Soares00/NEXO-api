@@ -51,5 +51,7 @@ az group delete --name "$AZURE_RESOURCE_GROUP" --subscription "$AZURE_SUBSCRIPTI
 existe=$(az group exists --name "$AZURE_RESOURCE_GROUP" --subscription "$AZURE_SUBSCRIPTION_ID" --output tsv --only-show-errors)
 existe=${existe%$'\r'}
 [[ "$existe" == false ]] || falhar 'A exclusão ainda não foi confirmada. Consulte novamente antes de encerrar a demonstração.'
-printf 'Exclusão confirmada: az group exists retornou false para %s.\n' "$AZURE_RESOURCE_GROUP"
-az resource list --subscription "$AZURE_SUBSCRIPTION_ID" --query "[?resourceGroup=='$AZURE_RESOURCE_GROUP'].{nome:name,tipo:type}" --output table --only-show-errors
+restantes=$(az resource list --subscription "$AZURE_SUBSCRIPTION_ID" --query "[?resourceGroup=='$AZURE_RESOURCE_GROUP'].{nome:name,tipo:type}" --output json --only-show-errors)
+[[ "$restantes" =~ ^[[:space:]]*\[[[:space:]]*\][[:space:]]*$ ]] || falhar 'Ainda há recursos listados no grupo. A limpeza total não foi confirmada; confira antes de encerrar.'
+printf 'Exclusão confirmada: grupo %s ausente e nenhum recurso restante nesse grupo.\n' "$AZURE_RESOURCE_GROUP"
+printf '%s\n' "$restantes"
