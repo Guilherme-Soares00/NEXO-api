@@ -178,4 +178,4 @@ O Compose atual mantém a publicação em loopback para testes locais e acesso a
 
 Os scripts de provisionamento, instalação e exclusão e o guia de acesso remoto estão preparados em [Azure](azure.md). A execução real, a configuração na VM e a conectividade com o Oracle ainda dependem da sessão autorizada. Não enviar o token administrativo por HTTP público. A aplicação precisa ser demonstrada em execução na VM, não apenas localmente.
 
-Ainda serão entregues o diagrama com ícones dos serviços efetivos, o vídeo de aproximadamente três minutos em 720p ou superior, o PDF final e a comprovação da exclusão do grupo de recursos.
+O [diagrama da arquitetura](arquitetura-devops.md) está preparado. A gravação, o PDF final e a comprovação da exclusão dependem da demonstração real na VM.

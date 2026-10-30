@@ -6,13 +6,16 @@ Projeto acadêmico do Challenge FIAP ADS 2026, com entregas de Java Advanced e D
 
 ## Acesso rápido por disciplina
 
-| Quero fazer | Guia |
-| --- | --- |
-| Executar a API no IntelliJ/Maven | [Execução Java](#executar-a-api) |
-| Entender o contrato HTTP e o Oracle | [API](README.md#java-advanced) · [Oracle](README.md#banco-oracle) |
-| Executar em container no computador | [Docker local](docs/docker.md) |
-| Planejar a VM sem criar recursos | [Azure e scripts](docs/azure.md#planejamento-seguro) |
-| Excluir e comprovar a limpeza após a demonstração | [Exclusão dos recursos](docs/azure.md#exclusão-e-comprovação) |
+| Disciplina | Conteúdo | Por onde começar |
+| --- | --- | --- |
+| **Java Advanced** | API REST, JPA, Oracle, validação, busca, Swagger e testes | **[Seção Java](#java-advanced)** · [Executar a API](#executar-a-api) · [Testes](#testes-e-resultados) |
+| **DevOps & Cloud** | Docker, VM Azure, rede, custos, arquitetura e exclusão dos recursos | **[Seção DevOps](#devops--cloud)** · **[Guia Docker](docs/docker.md)** · [Guia Azure](docs/azure.md) |
+
+> **Configuração do ambiente**
+>
+> Antes de executar em outra máquina, consulte **[os pré-requisitos e os arquivos de configuração](#configuração-do-ambiente)**. A execução Java não exige Docker ou Azure; a execução em Docker não exige uma assinatura Azure.
+
+## Grupo
 
 Turma: 2TDSPB
 
@@ -25,9 +28,32 @@ Turma: 2TDSPB
 | Gabriel Stuani | 566682 |
 
 Repositório: [Guilherme-Soares00/NEXO-api](https://github.com/Guilherme-Soares00/NEXO-api)
-Entrega interna:.
 
-## Tecnologias e funcionamento
+
+## Configuração do ambiente
+
+O projeto não exige a assinatura Azure, o IP ou a chave SSH do desenvolvedor. Cada pessoa configura seu próprio ambiente a partir dos arquivos de exemplo. **Clonar o repositório não configura automaticamente o banco nem cria uma VM.** Executar os comandos na raiz da cópia do projeto, sem usar caminhos particulares de outro computador.
+
+| Forma de execução | Disciplina | Pré-requisitos | Configuração e instruções |
+| --- | --- | --- | --- |
+| Testes locais | Java Advanced | JDK 25 e Maven compatível | `mvn verify` não exige Azure, Docker nem conexão Oracle; ver [Testes e resultados](#testes-e-resultados) |
+| API pelo IntelliJ/Maven | Java Advanced | JDK 25, Maven e acesso a um Oracle preparado | Variáveis de `.env.example` no ambiente do processo; ver [Executar a API](#executar-a-api) |
+| API em Docker local | DevOps & Cloud | Docker Engine com containers Linux, Docker Compose e acesso ao Oracle | `.env.docker`, a partir de `docker.env.example`; seguir **[o Guia Docker](docs/docker.md)** |
+| Infraestrutura Azure | DevOps & Cloud | Git, Bash, Azure CLI, OpenSSH e assinatura autorizada com permissão, quota e orçamento | `.env.azure` no computador e `.env.docker` na futura VM; ver [Configuração Azure](#azure-o-que-alterar-no-próprio-ambiente) e [Guia Azure](docs/azure.md) |
+
+Java e Maven no computador não são necessários para o build Docker, pois o Dockerfile inclui o estágio de compilação. No Windows, iniciar o Docker Desktop com containers Linux para a execução local e usar Git Bash para os scripts `.sh`.
+
+Para conferir as ferramentas, conforme a opção escolhida: `java -version`, `mvn -version`, `git --version`, `bash --version`, `az version`, `ssh -V`, `docker version` e `docker compose version`.
+
+**Arquivos particulares não acompanham o repositório:** `.env`, `.env.azure`, `.env.docker` e chaves privadas. Não preencher os exemplos públicos com senhas, tokens ou dados de uma conta real. Configurar o próprio ambiente não exige receber arquivos privados do desenvolvedor.
+
+---
+
+## Java Advanced
+
+Esta seção apresenta a implementação e a execução da API Java: modelo, persistência, endpoints, validações, segurança e testes. **Docker, assinatura Azure e chave SSH não são requisitos para executar a API pelo IntelliJ/Maven.** O acesso a um Oracle preparado é necessário para iniciar a aplicação, mas não para executar os testes locais.
+
+### Tecnologias e funcionamento
 
 Java 25, Spring Boot 3.5.16, Spring MVC, Spring Data JPA, Oracle JDBC e springdoc 2.9.1. Controllers recebem DTOs validados; serviços controlam transações; repositories Spring Data JPA fazem leituras e escritas nas quatro entidades.
 
@@ -39,13 +65,13 @@ Enunciado vigente: `2TDS Agosto - Marinha 2026 - 1º Semestre V2.pdf`, páginas 
 
 Oracle é o perfil padrão. A aplicação não cria tabelas, sequences ou dados. Para instalação manual em schema próprio sem objetos NEXO, usar [docs/sql/schema-oracle.sql](docs/sql/schema-oracle.sql). O schema deve atender a [README.md#banco-oracle](README.md#banco-oracle). IDs usam as sequences existentes com allocationSize=1; DATA_ESCOLHA continua sendo gerada no banco e preservada no PUT.
 
-## Alinhamento com o Oracle 19c
+### Alinhamento com o Oracle 19c
 
 Tabelas NEXO_CENARIO, NEXO_ALTERNATIVA, NEXO_DECISAO e NEXO_MITO_FATO. Mito ou Fato pertence ao cenário e é compartilhado por A/B. Não há campo de ordenação no modelo. Situação e feedback aceitam até 1000 caracteres; apelidos, de 3 a 50. DATA_ESCOLHA é data/hora local sem fuso, gerada no Oracle, sem conversão para UTC.
 
 CRUD de mitos/fatos em /mitos-fatos; consulta por cenário em /cenarios/{id}/mitos-fatos. GET /cenarios/{id}/jogo exige A, B e ao menos um item de descoberta. O CRUD comum permite montar o conteúdo gradualmente. Estrutura e requisitos do schema em [README.md#banco-oracle](README.md#banco-oracle).
 
-## Testes e resultados
+### Testes e resultados
 
 Requisitos: JDK 25 e Maven compatível. Conferir com `java -version` e `mvn -version`.
 
@@ -64,7 +90,7 @@ A integração exige schema Oracle de testes separado e vazio. Na execução reg
 
 Na atualização dos dados educativos, `mvn verify` foi executado novamente: **146 testes locais aprovados**, sem falhas. As duas coleções Postman também passaram no Newman contra Oracle real, conforme [README.md#dados-para-teste](README.md#dados-para-teste). Os 144 testes de integração Oracle citados acima pertencem à execução anterior.
 
-## Executar a API
+### Executar a API
 
 Configure as variáveis abaixo no ambiente do processo:
 
@@ -102,13 +128,13 @@ java -jar target/nexo-0.0.1-SNAPSHOT.jar
 
 Configuração Windows e testes Oracle: [README.md#executar-a-api](README.md#executar-a-api).
 
-## Administração protegida
+### Administração protegida
 
 Catálogo e POST /decisoes são públicos. Alterações de conteúdo e consulta, alteração ou exclusão de decisões exigem o cabeçalho `Authorization: Bearer <token>`, correspondente a `NEXO_ADMIN_TOKEN` no ambiente. A aplicação exige um token válido para iniciar. Não há tabela de usuários, login ou JWT.
 
 Geração local do token, matriz de acesso, Swagger, Postman, rotação e limites: [README.md#administração-protegida](README.md#administração-protegida). Nunca enviar o token por HTTP público nem embuti-lo em aplicativos distribuídos. HTTPS/túnel seguro e proteção contra abuso devem ser definidos antes da exposição remota.
 
-## Documentação e dados para teste
+### Documentação e dados para teste
 
 - [Produto](README.md)
 - [Contrato HTTP](README.md#java-advanced)
@@ -124,15 +150,106 @@ Geração local do token, matriz de acesso, Swagger, Postman, rotação e limite
 
 A coleção [requests/NEXO.postman_collection.json](requests/NEXO.postman_collection.json) acompanha o CRUD, captura IDs e exclui os registros de exemplo ao terminar. Para manter os dados de teste, usar [requests/NEXO.dados-teste.postman_collection.json](requests/NEXO.dados-teste.postman_collection.json): cria um cenário, alternativas A/B, um Mito ou Fato e uma decisão fictícia, sem limpeza automática. O exemplo de Saúde contém um cenário educativo específico, alternativas fundamentadas em fontes AIEA/FDA e um Fato sobre esterilização por radiação. As duas coleções foram executadas via Newman com Oracle real: carga de demonstração com 8 requisições e 18 asserções; CRUD com 29 requisições e 45 asserções, sem falhas. Os dados de demonstração foram mantidos. Esse exemplo não substitui a carga DML de Database nem um catálogo de todas as categorias. Consulte [README.md#dados-para-teste](README.md#dados-para-teste).
 
-## Docker e Oracle externo
+---
+
+## DevOps & Cloud
+
+Esta seção trata do empacotamento e da infraestrutura da mesma API Java. **Docker local e implantação na Azure são etapas diferentes:** o teste local permite conferir o container; a demonstração de nuvem exige a aplicação executando na VM criada por Azure CLI.
+
+### Docker: execução local e configuração
+
+> **[Guia Docker — preparação, build e execução](docs/docker.md)**
+>
+> Siga o guia para criar `.env.docker`, gerar o token, construir a imagem e verificar o container. Não é necessário configurar Azure, IP administrativo ou chave SSH para essa etapa local.
+
+1. [Preparar o ambiente e as variáveis](docs/docker.md#1-preparar-o-ambiente).
+2. [Testar e construir a imagem](docs/docker.md#2-testar-e-construir).
+3. [Executar o container em background](docs/docker.md#3-executar-em-background).
+4. [Conferir a API e o healthcheck](docs/docker.md#4-conferir-somente-leitura).
 
 A API pode ser compilada e executada em container com Java 25, mantendo o Oracle externo do grupo. O Dockerfile usa múltiplos estágios e usuário sem privilégios administrativos; o Compose publica a API somente em `127.0.0.1:8081`, sem interferir na porta padrão do IntelliJ.
 
-Preparação do `.env.docker`, build, execução, verificação e limites da validação: [Docker](docs/docker.md). O arquivo [docker.env.example](docker.env.example) não contém credenciais; o arquivo local `.env.docker` é ignorado pelo Git e excluído do contexto de build.
-
 Docker padroniza o empacotamento e a execução da API. Cloud Computing permitirá hospedar essa imagem em uma VM Azure, acessando o mesmo Oracle autorizado. Nenhum recurso de nuvem foi provisionado nesta etapa; a entrega DevOps ainda exige execução na VM criada por Azure CLI e seus materiais de comprovação.
 
-## Azure: planejamento antes de gastar créditos
+#### Oracle e variáveis do container
+
+O Oracle é externo: **o Compose não instala banco nem cria o schema**. É necessário acesso autorizado ao schema do grupo ou a um Oracle próprio preparado conforme o [contrato do banco](README.md#banco-oracle). O script de estrutura indicado nesse contrato só deve ser executado em um schema próprio apropriado, nunca automaticamente no banco compartilhado. Não executar `-Poracle-it` nesse schema compartilhado: a suíte exige um schema de testes separado e vazio.
+
+Para Docker, copiar `docker.env.example` para `.env.docker` e preencher:
+
+| Variável | Configuração necessária |
+| --- | --- |
+| `ORACLE_JDBC_URL` | Informar o endereço JDBC do Oracle autorizado; o exemplo FIAP só serve se houver acesso a esse servidor. `localhost` dentro do container não aponta para o computador hospedeiro |
+| `APP_USER` | Informar o usuário do schema preparado |
+| `APP_USER_PASSWORD` | Informar a senha desse usuário apenas no arquivo local |
+| `NEXO_ADMIN_TOKEN` | Gerar um token próprio de 64 caracteres hexadecimais pelo [guia Docker](docs/docker.md#1-preparar-o-ambiente); o cliente administrativo deve usar o token dessa instância |
+| `API_PORT` | Manter `8081` para Docker local ou escolher outra porta livre; essa variável não controla a publicação na Azure |
+
+O arquivo [docker.env.example](docker.env.example) não contém credenciais; `.env.docker` é ignorado pelo Git e excluído do contexto de build. Os exemplos não importam a configuração do IntelliJ. Na VM, usar o mesmo nome `.env.docker`, mas preencher o arquivo naquele ambiente; não copiar indiscriminadamente arquivos particulares do computador. Os comandos completos estão no **[Guia Docker](docs/docker.md)**.
+
+### Azure: o que alterar no próprio ambiente
+
+A criação na Azure consome o orçamento ou os créditos da **assinatura selecionada e configurada em `.env.azure`**, não de uma conta embutida no projeto. Autenticar e selecionar a própria assinatura autorizada. Estes comandos preparam a sessão e o arquivo local, sem criar recursos:
+
+```bash
+az login
+az account show --query '{assinatura:name,id:id,estado:state}' --output table
+cp -n azure.env.example .env.azure
+```
+
+Se houver mais de uma assinatura disponível, listar com `az account list --query '[].{nome:name,id:id}' --output table` e selecionar com `az account set --subscription 'ID_DA_ASSINATURA_ESCOLHIDA'`, substituindo o identificador pelo ID real desejado. Conferir novamente `az account show` e usar esse mesmo ID no arquivo.
+
+Editar o `.env.azure` criado. O `cp -n` não sobrescreve uma configuração já existente.
+
+| Variável | Precisa alterar? | Como preencher |
+| --- | --- | --- |
+| `AZURE_SUBSCRIPTION_ID` | Sim | Copiar o ID da própria assinatura selecionada, conferido pelo comando acima |
+| `ADMIN_CIDR` | Sim | Informar o IPv4 público da conexão administrativa seguido de `/32`; não é o IP da futura VM |
+| `SSH_PUBLIC_KEY` | Preparar o arquivo | Gerar ou reutilizar uma chave própria. O padrão `$HOME/.ssh/nexo-azure.pub` pode ser mantido se o arquivo existir nesse caminho |
+| `AZURE_LOCATION` | Conferir | `chilecentral` é a primeira tentativa deste projeto, não uma garantia para outras contas. Usar região aceita pelo script e permitida na própria assinatura |
+| `AZURE_VM_SIZE` | Conferir | `Standard_B2als_v2` é a candidata econômica com 2 vCPUs e 4 GiB; depende da disponibilidade, quota e preço na região escolhida. Não existe substituição automática por modelo mais caro |
+| `AZURE_IMAGE` | Conferir | Manter a imagem Ubuntu 24.04 LTS x86-64 indicada no exemplo se estiver disponível. O instalador Docker exige essa distribuição e arquitetura; não trocar por outro sistema sem ajustar a instalação |
+| `AZURE_RESOURCE_GROUP` | Conferir | Manter `rg-nexo-devops` somente se o grupo não existir na assinatura. Para outro grupo dedicado, usar um sufixo, como `rg-nexo-devops-demo`; o script exige esse prefixo e não reutiliza grupos existentes |
+| `AZURE_VM_NAME` | Pode manter | `vm-nexo`, dentro do novo grupo dedicado |
+| `AZURE_ADMIN_USER` | Pode manter | `nexoadmin`, usuário Linux que será criado na VM; não é o login da conta Azure |
+| `AZURE_API_PORT` | Pode manter | `8080`. Se alterar, configurar o mesmo valor na `.env.docker` da VM e ajustar o acesso e o túnel conforme o guia Azure |
+
+Para consultar o IPv4 público da conexão atual:
+
+```bash
+curl -4 --fail --silent --show-error https://api.ipify.org
+printf '\n'
+```
+
+Acrescentar `/32` ao resultado ao preencher `ADMIN_CIDR`. Uma mudança de rede ou de IP pode exigir atualizar as regras de acesso. O IP da VM é outro endereço, criado pelo provisionamento e consultado depois pelo guia Azure.
+
+Para gerar uma chave própria, somente se nenhum dos arquivos de destino existir:
+
+```bash
+mkdir -p "$HOME/.ssh"
+if [[ ! -e "$HOME/.ssh/nexo-azure" && ! -e "$HOME/.ssh/nexo-azure.pub" ]]; then
+    ssh-keygen -t ed25519 -f "$HOME/.ssh/nexo-azure" -C nexo-azure
+fi
+```
+
+Se o par já existir, reutilizar e conferir o caminho configurado, sem sobrescrever. Se houver apenas um dos arquivos, regularizar o par antes de continuar. A chave pública termina em `.pub`; a privada permanece no computador de quem acessará a VM. Se optar por uma passphrase, digitá-la diretamente no terminal. Nunca compartilhar a chave privada ou a passphrase.
+
+**Limitação atual de regiões:** o provisionador aceita `chilecentral`, `mexicocentral`, `eastus`, `canadacentral` e `centralus`, conforme a política observada na assinatura usada na preparação. Essa lista não descreve todas as regiões da Azure nem as permissões de outra conta. Se a assinatura utilizada só permitir uma região fora dessa lista, alterar apenas `.env.azure` não será suficiente: a validação de região do provisionador precisará ser adaptada. Antes disso, conferir a política da assinatura, a compatibilidade e os custos; não remover as proteções de assinatura, acesso ou exclusão.
+
+Depois de preencher o arquivo, carregar os valores na sessão Git Bash e conferir o planejamento:
+
+```bash
+set -a
+. ./.env.azure
+set +a
+bash infra/scripts/provisionar-azure.sh --planejar
+```
+
+O planejamento não chama a Azure nem comprova disponibilidade; apenas mostra os comandos com os parâmetros escolhidos. A criação efetiva e a instalação na VM estão separadas no [guia Azure](docs/azure.md#execução-futura-com-autorização), exigem autorização para o gasto e ainda não foram demonstradas neste projeto. Quota, políticas, disponibilidade de VM/imagem e conectividade da VM ao Oracle podem impedir a execução em outra assinatura.
+
+Após concluir a demonstração, usar [o procedimento de exclusão do grupo](docs/azure.md#exclusão-e-comprovação). Ele remove os recursos desse grupo e verifica sua ausência; desligar a VM não substitui essa limpeza. Não colocar recursos alheios ao projeto no grupo dedicado. As opções de exclusão de disco, NIC e IP público não eliminam a necessidade de conferir resíduos de uma criação que falhou.
+
+### Azure: provisionamento e exclusão
 
 Os scripts `.sh` de criação da VM, instalação do Docker e exclusão do grupo estão preparados. **Por padrão, eles apenas planejam: não criam recursos, não excluem recursos e não instalam pacotes.** A execução real exige `--executar`; o provisionamento e a exclusão exigem também confirmações explícitas diferentes.
 
@@ -140,6 +257,21 @@ Os scripts `.sh` de criação da VM, instalação do Docker e exclusão do grupo
 - [Parâmetros de exemplo, sem segredos](azure.env.example)
 
 A preparação foi validada localmente, com comandos Azure simulados e consultas reais somente de leitura. **Nenhum recurso Azure foi provisionado.** O deploy na VM, o acesso Azure → Oracle e a exclusão real ainda precisam ser demonstrados.
+
+### Arquitetura e demonstração
+
+![Arquitetura planejada do NEXO no Azure, com API em Docker e Oracle FIAP externo.](docs/diagrama-arquitetura.png)
+
+O [guia de arquitetura](docs/arquitetura-devops.md) explica os componentes e apresenta o diagrama em PNG.
+
+
+
+
+O desenho corresponde ao planejamento atual. Antes da gravação, conferir os recursos efetivamente usados e atualizar qualquer diferença. A implantação Azure ainda não foi executada.
+
+---
+
+## Escopo e observações
 
 Contas individuais, login, ranking, painel e interfaces de outras disciplinas não integram a API atual; a administração é protegida pelo token compartilhado autorizado.
 

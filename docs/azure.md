@@ -36,13 +36,13 @@ Computador administrativo
   → Oracle FIAP externo, usando o acesso autorizado ao schema do grupo
 ```
 
-Esse desenho textual explica o fluxo; não substitui o diagrama final com ícones Azure exigido na entrega.
+O [diagrama com ícones Azure](arquitetura-devops.md) apresenta essa mesma estrutura em uma versão indicada para o README, o vídeo e o PDF.
 
-Padrões: grupo `rg-nexo-devops`, VM `vm-nexo`, região `eastus`, candidata `Standard_B2ls_v2`, disco Standard SSD LRS de 32 GiB e usuário SSH `nexoadmin`. A VM não possui autenticação por senha. Não há Oracle em container, Azure SQL, NAT Gateway ou outros serviços pagos adicionais previstos nos scripts.
+Padrões: grupo `rg-nexo-devops`, VM `vm-nexo`, região `chilecentral`, candidata `Standard_B2als_v2`, disco Standard HDD LRS de 32 GiB e usuário SSH `nexoadmin`. A VM não possui autenticação por senha. Não há Oracle em container, Azure SQL, NAT Gateway ou outros serviços pagos adicionais previstos nos scripts.
 
 Somente SSH e a porta HTTP da API recebem regras personalizadas de entrada. Ambas são restritas ao IPv4 administrativo com máscara `/32`; o script rejeita `0.0.0.0/0`. As regras padrão do NSG continuam existindo. O listener Oracle não é exposto nessa VM.
 
-A candidata tem 2 vCPUs e 4 GiB, pois hospeda API e Docker, não o Oracle. Quota e imagem foram consultadas; disponibilidade do SKU e alocação continuam pendentes.
+A candidata tem 2 vCPUs e 4 GiB, pois hospeda API e Docker, não o Oracle. Priorizar o menor custo compatível com essa execução e conferir os preços na região escolhida. As consultas anteriores de quota e imagem foram em `eastus`; elas não comprovam disponibilidade em `chilecentral`. SKU, imagem e alocação nessa região continuam pendentes.
 
 ## Preparação local sem provisionar
 
@@ -60,8 +60,8 @@ Editar `.env.azure` localmente. Esse arquivo é ignorado pelo Git; não colocar 
 | --- | --- |
 | `AZURE_SUBSCRIPTION_ID` | ID exato da assinatura da faculdade |
 | `AZURE_RESOURCE_GROUP` | Grupo dedicado; manter `rg-nexo-devops` ou um sufixo alfanumérico |
-| `AZURE_LOCATION` | `eastus`, dentro da política observada |
-| `AZURE_VM_SIZE` | `Standard_B2ls_v2`, pendente de disponibilidade |
+| `AZURE_LOCATION` | `chilecentral`, escolhida para a primeira tentativa, dentro da política observada |
+| `AZURE_VM_SIZE` | `Standard_B2als_v2`, menor preço entre as candidatas comparadas com 2 vCPUs e 4 GiB; disponibilidade pendente |
 | `ADMIN_CIDR` | IPv4 público da rede administrativa seguido de `/32` |
 | `SSH_PUBLIC_KEY` | Caminho do arquivo de chave pública, terminado em `.pub` |
 | `AZURE_API_PORT` | `8080`, igual à porta publicada futuramente na VM |
@@ -88,7 +88,7 @@ Para a chave SSH, reutilizar uma chave própria adequada ou gerar uma nova local
 ssh-keygen -t ed25519 -f "$HOME/.ssh/nexo-azure" -C nexo-azure
 ```
 
-Escolher a passphrase diretamente no terminal e não compartilhar a chave privada. A geração é uma preparação local, não provisionamento Azure. Este módulo não gerou nem substituiu chaves.
+Se optar por uma passphrase, informá-la diretamente no terminal; nunca compartilhá-la no chat ou no vídeo. Manter a chave privada fora do repositório e com permissões de arquivo restritas. A geração é uma preparação local, não provisionamento Azure. Se o par já existir, validar e reutilizar, sem gerar novamente ou sobrescrever.
 
 ## Planejamento seguro
 
@@ -117,6 +117,10 @@ As duas condições são necessárias. O script recusa configurações inválida
 A consulta de SKUs pode demorar. Se houver erro ou timeout, interromper e investigar sem retirar os bloqueios ou trocar a VM silenciosamente. A confirmação de quota não garante capacidade de alocação.
 
 O script cria um grupo dedicado com tags `projeto=NEXO` e `finalidade=devops-sprint1`, uma VNet/subnet, NSG e duas regras, IP público, NIC e VM. A NIC já existente é fornecida ao comando de criação da VM, evitando uma segunda rede implícita. Não usa `az vm open-port`.
+
+O provisionamento define `Delete` para o disco do sistema e a NIC na criação da VM. Também configura `Delete` no IP público associado à NIC, antes de criar a VM. As propriedades são consultadas novamente: sem confirmação do IP, a VM não é criada; sem confirmação do disco e da NIC, o script não anuncia a proteção como concluída.
+
+Essas opções são para a exclusão da VM, não para desligamento ou desalocação. Elas não apagam VNet, NSG nem recursos adicionados depois. A limpeza final continua sendo a exclusão de todo o grupo dedicado pelo script apropriado.
 
 Uma falha depois da criação do grupo pode deixar recursos parciais consumindo créditos. Não há exclusão automática; conferir o estado e autorizar a limpeza pelo script apropriado.
 
@@ -149,7 +153,7 @@ cd NEXO-api
 
 O instalador verifica Ubuntu 24.04 e x86-64, usa o repositório oficial Docker e não remove pacotes conflitantes automaticamente. Não adiciona o usuário SSH ao grupo Docker, que concede privilégios elevados; por isso os comandos usam `sudo docker`.
 
-O clone contém apenas arquivos publicados. Se os arquivos aprovados ainda existirem somente no computador, transferir os arquivos necessários via SCP antes de executar; não presumir que um commit local já esteja disponível no GitHub. Nunca copiar `.idea`, `.env` da IDE ou a chave privada. Não houve publicação automática neste módulo.
+O clone contém apenas arquivos publicados. Se os arquivos aprovados ainda existirem somente no computador, transferir os arquivos necessários via SCP antes de executar; não presumir que um commit local já esteja disponível no GitHub. Nunca copiar `.idea`, `.env` da IDE ou a chave privada. A publicação no GitHub é uma etapa separada; conferir o conteúdo remoto antes de clonar.
 
 Na VM, preparar `.env.docker` com as credenciais autorizadas, seguindo [o guia Docker](docker.md). Gerar o token nesse arquivo e informar usuário e senha diretamente por um editor local da VM; não enviá-los em comandos SSH ou no vídeo. Aplicar permissão restrita:
 
@@ -216,7 +220,7 @@ Somente após autorizar a exclusão de todo o grupo dedicado:
 CONFIRMAR_EXCLUSAO="$AZURE_RESOURCE_GROUP" bash infra/scripts/excluir-recursos.sh --executar
 ```
 
-O script exige o nome exato do grupo, prefixo esperado, assinatura selecionada correta e tags do projeto. Lista os recursos, espera o comando de exclusão concluir e consulta novamente a existência do grupo. Não anuncia sucesso se o grupo continuar existindo. Esses controles não substituem conferir se alguém adicionou outro recurso importante ao grupo.
+O script exige o nome exato do grupo, prefixo esperado, assinatura selecionada correta e tags do projeto. Lista os recursos, espera o comando de exclusão concluir, consulta novamente a existência do grupo e exige uma lista JSON vazia de recursos restantes nesse grupo. Não anuncia sucesso se o grupo continuar existindo, se a consulta falhar ou se houver recursos listados. A exclusão abrange VM, disco, NIC, IP público, NSG e VNet desse grupo. Esses controles não substituem conferir se alguém adicionou outro recurso importante ao grupo.
 
 Comprovação adicional, somente leitura:
 
@@ -233,6 +237,7 @@ O primeiro comando deve retornar `false`; o segundo não deve listar recursos do
 - O modo padrão dos três scripts foi executado localmente e não realizou chamadas Azure nem instalação.
 - Caminhos de criação e exclusão foram exercitados com uma função `az` simulada, sem acesso ao serviço real.
 - Testes cobriram confirmação ausente, ID inválido, origem irrestrita, assinatura diferente, grupo existente, SKU restrito, tags incorretas e ausência de confirmação real de exclusão.
+- Testes locais adicionais cobriram o padrão `chilecentral`, as opções `Delete`, a interrupção diante de proteção não confirmada e a recusa de anunciar limpeza enquanto houver recursos listados. As respostas Azure desses testes foram simuladas, não constituem uma validação do comportamento no serviço real.
 - O fluxo do instalador foi exercitado em container Ubuntu 24.04 descartável, com apt, download, systemctl e Docker simulados; nenhum pacote foi instalado nesse teste.
 - O Docker Compose validou o merge e confirmou que somente a porta da API muda, sem alterar as variáveis de conexão ou acrescentar banco.
 - Consultas reais de leitura confirmaram assinatura ativa, política de regiões, quota e imagem. A consulta de SKUs expirou, portanto sua disponibilidade permanece pendente.
@@ -247,3 +252,4 @@ O primeiro comando deve retornar `false`; o segundo não deve listar recursos do
 - [NSG e regras](https://learn.microsoft.com/en-us/cli/azure/network/nsg/rule?view=azure-cli-latest)
 - [IP público](https://learn.microsoft.com/en-us/cli/azure/network/public-ip?view=azure-cli-latest)
 - [Grupos de recursos e exclusão](https://learn.microsoft.com/en-us/cli/azure/group?view=azure-cli-latest)
+- [Exclusão da VM e dos recursos associados](https://learn.microsoft.com/en-us/azure/virtual-machines/delete)
