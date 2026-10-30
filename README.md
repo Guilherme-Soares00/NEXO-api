@@ -15,7 +15,6 @@ Turma: 2TDSPB
 | Gabriel Stuani | 566682 |
 
 Repositório: [Guilherme-Soares00/NEXO-api](https://github.com/Guilherme-Soares00/NEXO-api)
-Entrega interna:.
 
 ## Tecnologias e funcionamento
 
