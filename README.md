@@ -9,7 +9,7 @@ Projeto acadêmico do Challenge FIAP ADS 2026, com entregas de Java Advanced e D
 | Disciplina | Conteúdo | Por onde começar |
 | --- | --- | --- |
 | **Java Advanced** | API REST, JPA, Oracle, validação, busca, Swagger e testes | **[Seção Java](#java-advanced)** · [Executar a API](#executar-a-api) · [Testes](#testes-e-resultados) |
-| **DevOps & Cloud** | Docker, VM Azure, rede, custos, arquitetura e exclusão dos recursos | **[Seção DevOps](#devops--cloud)** · **[Guia Docker](docs/docker.md)** · [Guia Azure](docs/azure.md) |
+| **DevOps & Cloud** | Docker, VM Azure, rede, custos, arquitetura e exclusão dos recursos | **[Seção DevOps](#devops--cloud)** · **[Guia Docker](docs/devops/docker.md)** · [Guia Azure](docs/devops/azure.md) |
 
 > **Configuração do ambiente**
 >
@@ -38,8 +38,8 @@ O projeto não exige a assinatura Azure, o IP ou a chave SSH do desenvolvedor. C
 | --- | --- | --- | --- |
 | Testes locais | Java Advanced | JDK 25 e Maven compatível | `mvn verify` não exige Azure, Docker nem conexão Oracle; ver [Testes e resultados](#testes-e-resultados) |
 | API pelo IntelliJ/Maven | Java Advanced | JDK 25, Maven e acesso a um Oracle preparado | Variáveis de `.env.example` no ambiente do processo; ver [Executar a API](#executar-a-api) |
-| API em Docker local | DevOps & Cloud | Docker Engine com containers Linux, Docker Compose e acesso ao Oracle | `.env.docker`, a partir de `docker.env.example`; seguir **[o Guia Docker](docs/docker.md)** |
-| Infraestrutura Azure | DevOps & Cloud | Git, Bash, Azure CLI, OpenSSH e assinatura autorizada com permissão, quota e orçamento | `.env.azure` no computador e `.env.docker` na futura VM; ver [Configuração Azure](#azure-o-que-alterar-no-próprio-ambiente) e [Guia Azure](docs/azure.md) |
+| API em Docker local | DevOps & Cloud | Docker Engine com containers Linux, Docker Compose e acesso ao Oracle | `.env.docker`, a partir de `docker.env.example`; seguir **[o Guia Docker](docs/devops/docker.md)** |
+| Infraestrutura Azure | DevOps & Cloud | Git, Bash, Azure CLI, OpenSSH e assinatura autorizada com permissão, quota e orçamento | `.env.azure` no computador e `.env.docker` na futura VM; ver [Configuração Azure](#azure-o-que-alterar-no-próprio-ambiente) e [Guia Azure](docs/devops/azure.md) |
 
 Java e Maven no computador não são necessários para o build Docker, pois o Dockerfile inclui o estágio de compilação. No Windows, iniciar o Docker Desktop com containers Linux para a execução local e usar Git Bash para os scripts `.sh`.
 
@@ -63,7 +63,7 @@ Os recursos estão organizados em pacotes de domínio, com DTOs, controllers, se
 
 Enunciado vigente: `2TDS Agosto - Marinha 2026 - 1º Semestre V2.pdf`, páginas 33–36 para Java. Na página 38, Database adia procedures, functions com cursor e sua integração para a Sprint 2. O CRUD Java atual não depende dessas rotinas.
 
-Oracle é o perfil padrão. A aplicação não cria tabelas, sequences ou dados. Para instalação manual em schema próprio sem objetos NEXO, usar [docs/sql/schema-oracle.sql](docs/sql/schema-oracle.sql). O schema deve atender a [README.md#banco-oracle](README.md#banco-oracle). IDs usam as sequences existentes com allocationSize=1; DATA_ESCOLHA continua sendo gerada no banco e preservada no PUT.
+Oracle é o perfil padrão. A aplicação não cria tabelas, sequences ou dados. Para instalação manual em schema próprio sem objetos NEXO, usar [docs/java/sql/schema-oracle.sql](docs/java/sql/schema-oracle.sql). O schema deve atender a [README.md#banco-oracle](README.md#banco-oracle). IDs usam as sequences existentes com allocationSize=1; DATA_ESCOLHA continua sendo gerada no banco e preservada no PUT.
 
 ### Alinhamento com o Oracle 19c
 
@@ -158,14 +158,14 @@ Esta seção trata do empacotamento e da infraestrutura da mesma API Java. **Doc
 
 ### Docker: execução local e configuração
 
-> **[Guia Docker — preparação, build e execução](docs/docker.md)**
+> **[Guia Docker — preparação, build e execução](docs/devops/docker.md)**
 >
 > Siga o guia para criar `.env.docker`, gerar o token, construir a imagem e verificar o container. Não é necessário configurar Azure, IP administrativo ou chave SSH para essa etapa local.
 
-1. [Preparar o ambiente e as variáveis](docs/docker.md#1-preparar-o-ambiente).
-2. [Testar e construir a imagem](docs/docker.md#2-testar-e-construir).
-3. [Executar o container em background](docs/docker.md#3-executar-em-background).
-4. [Conferir a API e o healthcheck](docs/docker.md#4-conferir-somente-leitura).
+1. [Preparar o ambiente e as variáveis](docs/devops/docker.md#1-preparar-o-ambiente).
+2. [Testar e construir a imagem](docs/devops/docker.md#2-testar-e-construir).
+3. [Executar o container em background](docs/devops/docker.md#3-executar-em-background).
+4. [Conferir a API e o healthcheck](docs/devops/docker.md#4-conferir-somente-leitura).
 
 A API pode ser compilada e executada em container com Java 25, mantendo o Oracle externo do grupo. O Dockerfile usa múltiplos estágios e usuário sem privilégios administrativos; o Compose publica a API somente em `127.0.0.1:8081`, sem interferir na porta padrão do IntelliJ.
 
@@ -182,10 +182,10 @@ Para Docker, copiar `docker.env.example` para `.env.docker` e preencher:
 | `ORACLE_JDBC_URL` | Informar o endereço JDBC do Oracle autorizado; o exemplo FIAP só serve se houver acesso a esse servidor. `localhost` dentro do container não aponta para o computador hospedeiro |
 | `APP_USER` | Informar o usuário do schema preparado |
 | `APP_USER_PASSWORD` | Informar a senha desse usuário apenas no arquivo local |
-| `NEXO_ADMIN_TOKEN` | Gerar um token próprio de 64 caracteres hexadecimais pelo [guia Docker](docs/docker.md#1-preparar-o-ambiente); o cliente administrativo deve usar o token dessa instância |
+| `NEXO_ADMIN_TOKEN` | Gerar um token próprio de 64 caracteres hexadecimais pelo [guia Docker](docs/devops/docker.md#1-preparar-o-ambiente); o cliente administrativo deve usar o token dessa instância |
 | `API_PORT` | Manter `8081` para Docker local ou escolher outra porta livre; essa variável não controla a publicação na Azure |
 
-O arquivo [docker.env.example](docker.env.example) não contém credenciais; `.env.docker` é ignorado pelo Git e excluído do contexto de build. Os exemplos não importam a configuração do IntelliJ. Na VM, usar o mesmo nome `.env.docker`, mas preencher o arquivo naquele ambiente; não copiar indiscriminadamente arquivos particulares do computador. Os comandos completos estão no **[Guia Docker](docs/docker.md)**.
+O arquivo [docker.env.example](docker.env.example) não contém credenciais; `.env.docker` é ignorado pelo Git e excluído do contexto de build. Os exemplos não importam a configuração do IntelliJ. Na VM, usar o mesmo nome `.env.docker`, mas preencher o arquivo naquele ambiente; não copiar indiscriminadamente arquivos particulares do computador. Os comandos completos estão no **[Guia Docker](docs/devops/docker.md)**.
 
 ### Azure: o que alterar no próprio ambiente
 
@@ -245,24 +245,24 @@ set +a
 bash infra/scripts/provisionar-azure.sh --planejar
 ```
 
-O planejamento não chama a Azure nem comprova disponibilidade; apenas mostra os comandos com os parâmetros escolhidos. A criação efetiva e a instalação na VM estão separadas no [guia Azure](docs/azure.md#execução-futura-com-autorização), exigem autorização para o gasto e ainda não foram demonstradas neste projeto. Quota, políticas, disponibilidade de VM/imagem e conectividade da VM ao Oracle podem impedir a execução em outra assinatura.
+O planejamento não chama a Azure nem comprova disponibilidade; apenas mostra os comandos com os parâmetros escolhidos. A criação efetiva e a instalação na VM estão separadas no [guia Azure](docs/devops/azure.md#execução-futura-com-autorização), exigem autorização para o gasto e ainda não foram demonstradas neste projeto. Quota, políticas, disponibilidade de VM/imagem e conectividade da VM ao Oracle podem impedir a execução em outra assinatura.
 
-Após concluir a demonstração, usar [o procedimento de exclusão do grupo](docs/azure.md#exclusão-e-comprovação). Ele remove os recursos desse grupo e verifica sua ausência; desligar a VM não substitui essa limpeza. Não colocar recursos alheios ao projeto no grupo dedicado. As opções de exclusão de disco, NIC e IP público não eliminam a necessidade de conferir resíduos de uma criação que falhou.
+Após concluir a demonstração, usar [o procedimento de exclusão do grupo](docs/devops/azure.md#exclusão-e-comprovação). Ele remove os recursos desse grupo e verifica sua ausência; desligar a VM não substitui essa limpeza. Não colocar recursos alheios ao projeto no grupo dedicado. As opções de exclusão de disco, NIC e IP público não eliminam a necessidade de conferir resíduos de uma criação que falhou.
 
 ### Azure: provisionamento e exclusão
 
 Os scripts `.sh` de criação da VM, instalação do Docker e exclusão do grupo estão preparados. **Por padrão, eles apenas planejam: não criam recursos, não excluem recursos e não instalam pacotes.** A execução real exige `--executar`; o provisionamento e a exclusão exigem também confirmações explícitas diferentes.
 
-- [Guia Azure, acesso à VM e comprovação da exclusão](docs/azure.md)
+- [Guia Azure, acesso à VM e comprovação da exclusão](docs/devops/azure.md)
 - [Parâmetros de exemplo, sem segredos](azure.env.example)
 
 A preparação foi validada localmente, com comandos Azure simulados e consultas reais somente de leitura. **Nenhum recurso Azure foi provisionado.** O deploy na VM, o acesso Azure → Oracle e a exclusão real ainda precisam ser demonstrados.
 
 ### Arquitetura e demonstração
 
-![Arquitetura planejada do NEXO no Azure, com API em Docker e Oracle FIAP externo.](docs/diagrama-arquitetura.png)
+![Arquitetura planejada do NEXO no Azure, com API em Docker e Oracle FIAP externo.](docs/devops/diagrama-arquitetura.png)
 
-O [guia de arquitetura](docs/arquitetura-devops.md) explica os componentes e apresenta o diagrama em PNG.
+O [guia de arquitetura](docs/devops/arquitetura-devops.md) explica os componentes e apresenta o diagrama em PNG.
 
 ---
 
