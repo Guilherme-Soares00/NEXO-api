@@ -50,7 +50,7 @@ O script configura a exclusão do disco de sistema, da NIC e do IP público asso
 
 Depois de validar a implantação, conferir os nomes, a região, o modelo da VM e as portas efetivamente usados. Só então substituir a indicação de implantação pendente pela identificação da arquitetura demonstrada. Se o deploy mudar, atualizar o desenho e os guias antes de gravar.
 
-Os parâmetros estão em [azure.env.example](../azure.env.example), e os comandos de implantação estão no [guia Azure](azure.md).
+Os parâmetros estão em [azure.env.example](../../azure.env.example), e os comandos de implantação estão no [guia Azure](azure.md).
 
 ## Ícones e formatos
 

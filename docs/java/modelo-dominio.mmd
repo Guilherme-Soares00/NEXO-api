@@ -1,0 +1,72 @@
+---
+config:
+  theme: base
+  look: classic
+  fontFamily: Segoe UI, Arial, sans-serif
+  themeVariables:
+    fontFamily: Segoe UI, Arial, sans-serif
+    fontSize: 18px
+    primaryColor: '#102a3a'
+    primaryTextColor: '#e6edf3'
+    primaryBorderColor: '#4ec9dc'
+    secondaryColor: '#19342f'
+    tertiaryColor: '#28233e'
+    lineColor: '#b0bfd2'
+    textColor: '#e6edf3'
+    mainBkg: '#102a3a'
+    nodeBorder: '#4ec9dc'
+    edgeLabelBackground: '#0b1220'
+    background: '#0b1220'
+---
+classDiagram
+    direction LR
+
+    class Cenario {
+        <<Entity>>
+        -Long id
+        -String titulo
+        -Categoria categoria
+        -String situacao
+        -String objetivoEducacional
+        -String fonteUrl
+    }
+
+    class Alternativa {
+        <<Entity>>
+        -Long id
+        -Cenario cenario
+        -String rotulo
+        -String descricao
+        -String feedback
+    }
+
+    class Decisao {
+        <<Entity>>
+        -Long id
+        -Alternativa alternativa
+        -String apelido
+        -LocalDateTime dataEscolha
+    }
+
+    class MitoFato {
+        <<Entity>>
+        -Long id
+        -Cenario cenario
+        -String afirmacao
+        -Classificacao classificacao
+        -String explicacao
+        -String fonteUrl
+    }
+
+    Cenario "1" -- "0..2" Alternativa : oferece A e B
+    Alternativa "1" -- "0..*" Decisao : recebe escolhas
+    Cenario "1" -- "0..*" MitoFato : contextualiza
+
+    classDef contexto fill:#102a3a,stroke:#4ec9dc,color:#e6edf3
+    classDef escolha fill:#14352e,stroke:#61d8ae,color:#e6edf3
+    classDef registro fill:#302741,stroke:#bba3ed,color:#e6edf3
+    classDef descoberta fill:#362c20,stroke:#e4bb78,color:#e6edf3
+    cssClass "Cenario" contexto
+    cssClass "Alternativa" escolha
+    cssClass "Decisao" registro
+    cssClass "MitoFato" descoberta
