@@ -2,11 +2,11 @@
 
 ## Escopo
 
-Esta etapa reutiliza a API Java existente na prova de conceito de DevOps da Sprint 1 V2, páginas 24–28. Somente a API roda em container. O Oracle permanece no servidor da FIAP e no schema compartilhado acordado pelo grupo.
+Esta etapa reutiliza a API Java existente na prova de conceito de DevOps da Sprint 1, páginas 24–28. Somente a API roda em container. O Oracle permanece no servidor da FIAP e no schema compartilhado acordado pelo grupo.
 
 O container não cria tabelas, sequences ou dados. Não depende de procedures ou functions. O perfil Oracle mantém `ddl-auto=validate` e inicialização SQL desabilitada. A estrutura deve existir antes de iniciar a API.
 
-Docker padroniza o ambiente Java e o empacotamento da API. Cloud Computing permite executar essa mesma imagem em uma VM Azure, sem depender do IntelliJ ou do computador do desenvolvedor. Esta etapa valida a execução local; a demonstração avaliada ainda precisa ocorrer na VM criada por Azure CLI.
+Docker padroniza o ambiente Java e o empacotamento da API. Cloud Computing permite executar essa mesma imagem em uma VM Azure, sem depender do IntelliJ ou do computador do desenvolvedor. Este guia descreve a execução local. A demonstração na VM criada por Azure CLI já foi concluída e seu grupo de recursos foi excluído; o vídeo registra a execução e a limpeza.
 
 ## Arquivos
 
@@ -18,7 +18,7 @@ Docker padroniza o ambiente Java e o empacotamento da API. Cloud Computing permi
 | `docker.env.example` | Exemplo versionado sem usuário, senha ou token |
 | `.env.docker` | Configuração local ignorada pelo Git e excluída do contexto de build |
 
-O Compose é uma conveniência de execução, não um requisito expresso da V2. Não existe serviço Oracle ou volume de banco neste Compose: a persistência pertence ao Oracle externo.
+O Compose é uma conveniência de execução, não um requisito expresso do enunciado. Não existe serviço Oracle ou volume de banco neste Compose: a persistência pertence ao Oracle externo.
 
 ## Ferramentas
 
@@ -28,7 +28,7 @@ O Compose é uma conveniência de execução, não um requisito expresso da V2. 
 | Docker Engine | 29.8.2 | `docker version` |
 | Docker Compose | 5.6.0 | `docker compose version` |
 | Maven da imagem de build | 3.9.16 | `docker run --rm maven:3.9.16-eclipse-temurin-25 mvn -version` |
-| Java da imagem de execução | Temurin 25.0.4.1 | `docker run --rm --entrypoint java nexo-api:local -version` |
+| Java da imagem de execução | Temurin 25.0.5 na conferência final | `docker run --rm --entrypoint java nexo-api:local -version` |
 | Spring Boot | 3.5.16 | Consultar `pom.xml` |
 
 As tags usadas são `maven:3.9.16-eclipse-temurin-25` e `eclipse-temurin:25-jre-alpine`. Tags podem receber novas imagens; confira a versão e o ID efetivos ao reproduzir.
@@ -159,7 +159,13 @@ docker compose --env-file .env.docker up -d --build --force-recreate
 
 Alterações de dados feitas pela API continuam no Oracle independentemente da remoção do container.
 
-## Validação executada neste módulo
+## Conferência final
+
+O código corrigido passou em `mvn -B -ntp clean verify` com **148 testes locais**, sem falhas, erros ou ignorados. A imagem foi reconstruída e executou com Temurin 25.0.5; a tag de Java 25 recebeu atualização desde a validação inicial.
+
+O container atingiu `healthy` e passou por 16 verificações HTTP de leitura com o Oracle externo, incluindo catálogo, busca, Swagger/OpenAPI, decisões protegidas e entradas inválidas. Foram preservados o usuário sem privilégios, filesystem somente leitura, remoção de capacidades e `no-new-privileges`. A instância temporária de auditoria publicou uma porta própria em loopback, sem substituir o container anterior. Não houve escrita, instalação ou carga no banco, nem execução de `oracle-it`.
+
+## Histórico — validação inicial do container
 
 - `mvn -B -ntp verify`: BUILD SUCCESS, 147 testes locais, sem falhas, erros ou ignorados.
 - Build real de `nexo-api:local` concluído com sucesso.
@@ -172,10 +178,10 @@ Alterações de dados feitas pela API continuam no Oracle independentemente da r
 - Nenhuma escrita, instalação de schema ou carga de dados foi feita no Oracle neste módulo.
 - Nenhum recurso Azure foi criado; testes locais não comprovam conectividade a partir da nuvem.
 
-## Próxima etapa: Azure
+## Execução na Azure
 
 O Compose atual mantém a publicação em loopback para testes locais e acesso administrativo protegido. Não basta copiá-lo para a VM e esperar acesso público direto.
 
-Os scripts de provisionamento, instalação e exclusão e o guia de acesso remoto estão preparados em [Azure](azure.md). A execução real, a configuração na VM e a conectividade com o Oracle ainda dependem da sessão autorizada. Não enviar o token administrativo por HTTP público. A aplicação precisa ser demonstrada em execução na VM, não apenas localmente.
+A implantação foi demonstrada na VM Azure, incluindo Docker, build da imagem, container saudável e consulta ao Oracle externo. Os scripts e as instruções para reproduzir estão em [Azure](azure.md). Uma nova execução exige configuração e autorização próprias. Não enviar o token administrativo por HTTP público.
 
-O [diagrama da arquitetura](arquitetura-devops.md) está preparado. A gravação, o PDF final e a comprovação da exclusão dependem da demonstração real na VM.
+O [diagrama da arquitetura](arquitetura-devops.md), o [PDF final](entrega-devops.pdf) e a [demonstração com comprovação da exclusão](https://www.youtube.com/watch?v=KHZwnoqLOJQ) documentam a entrega concluída. O ambiente Azure não permanece ativo.

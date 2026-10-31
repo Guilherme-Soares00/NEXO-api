@@ -186,6 +186,17 @@ class ApiMvcTest {
         verifyNoInteractions(decisoes);
     }
 
+    @Test
+    void methodNotAllowedPreservesAllowHeader() throws Exception {
+        mvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch("/cenarios"))
+                .andExpect(status().isMethodNotAllowed())
+                .andExpect(jsonPath("$.status").value(405))
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.header()
+                        .string("Allow", org.hamcrest.Matchers.allOf(
+                                org.hamcrest.Matchers.containsString("GET"),
+                                org.hamcrest.Matchers.containsString("POST"))));
+    }
+
     private ObjectNode alternative() {
         return mapper.createObjectNode().put("cenarioId", 1).put("rotulo", "A")
                 .put("descricao", "Alternativa educativa.").put("feedback", "Benefícios e limitações.");
