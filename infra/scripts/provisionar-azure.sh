@@ -85,18 +85,13 @@ azure network nsg rule create --resource-group "$AZURE_RESOURCE_GROUP" --nsg-nam
 azure network nsg rule create --resource-group "$AZURE_RESOURCE_GROUP" --nsg-name nsg-nexo --name permitir-api --priority 110 --direction Inbound --access Allow --protocol Tcp --source-address-prefixes "$ADMIN_CIDR" --source-port-ranges '*' --destination-address-prefixes '*' --destination-port-ranges "$AZURE_API_PORT" --output none
 azure network public-ip create --resource-group "$AZURE_RESOURCE_GROUP" --name pip-nexo --location "$AZURE_LOCATION" --sku Standard --allocation-method Static --version IPv4 --output none
 azure network nic create --resource-group "$AZURE_RESOURCE_GROUP" --name nic-nexo --location "$AZURE_LOCATION" --vnet-name vnet-nexo --subnet subnet-nexo --network-security-group nsg-nexo --public-ip-address pip-nexo --output none
-azure network nic update --resource-group "$AZURE_RESOURCE_GROUP" --name nic-nexo --set 'ipConfigurations[0].publicIPAddress.deleteOption=Delete' --output none
-if [[ "$modo" == --executar ]]; then
-    exclusao_ip=$(az network nic show --resource-group "$AZURE_RESOURCE_GROUP" --name nic-nexo --subscription "$AZURE_SUBSCRIPTION_ID" --query 'ipConfigurations[0].publicIPAddress.deleteOption' --output tsv --only-show-errors)
-    exclusao_ip=${exclusao_ip%$'\r'}
-    [[ "$exclusao_ip" == Delete ]] || falhar 'Exclusão automática do IP não confirmada. A VM não foi criada; confira e autorize a limpeza do grupo parcial.'
-fi
 azure vm create --resource-group "$AZURE_RESOURCE_GROUP" --name "$AZURE_VM_NAME" --location "$AZURE_LOCATION" --size "$AZURE_VM_SIZE" --image "$AZURE_IMAGE" --admin-username "$AZURE_ADMIN_USER" --authentication-type ssh --ssh-key-values "$chave_ssh" --nics nic-nexo --nic-delete-option Delete --os-disk-name os-nexo --os-disk-size-gb 32 --os-disk-delete-option Delete --storage-sku Standard_LRS --security-type Standard --tags projeto=NEXO finalidade=devops-sprint1 --output none
 if [[ "$modo" == --executar ]]; then
     exclusao_vm=$(az vm show --resource-group "$AZURE_RESOURCE_GROUP" --name "$AZURE_VM_NAME" --subscription "$AZURE_SUBSCRIPTION_ID" --query "storageProfile.osDisk.deleteOption=='Delete' && networkProfile.networkInterfaces[0].deleteOption=='Delete'" --output tsv --only-show-errors)
     exclusao_vm=${exclusao_vm%$'\r'}
     [[ "$exclusao_vm" == true ]] || falhar 'Exclusão automática do disco e da NIC não confirmada. Confira os recursos e autorize a limpeza do grupo.'
-    printf 'Exclusão automática confirmada: disco do sistema, NIC e IP público configurados com Delete.\n'
+    printf 'Exclusão automática confirmada: disco do sistema e NIC configurados com Delete.\n'
+    printf 'O IP público não tem exclusão automática configurada. Ao terminar, exclua o grupo inteiro %s com infra/scripts/excluir-recursos.sh.\n' "$AZURE_RESOURCE_GROUP"
 fi
 azure vm show --resource-group "$AZURE_RESOURCE_GROUP" --name "$AZURE_VM_NAME" --show-details --query '{nome:name,estado:powerState,ipPublico:publicIps,tamanho:hardwareProfile.vmSize}' --output table
 azure network nsg rule list --resource-group "$AZURE_RESOURCE_GROUP" --nsg-name nsg-nexo --query '[].{regra:name,origem:sourceAddressPrefix,porta:destinationPortRange,acesso:access}' --output table
