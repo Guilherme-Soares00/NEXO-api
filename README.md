@@ -156,6 +156,10 @@ A coleção [requests/NEXO.postman_collection.json](requests/NEXO.postman_collec
 
 Esta seção trata do empacotamento e da infraestrutura da mesma API Java. **Docker local e implantação na Azure são etapas diferentes:** o teste local permite conferir o container; a demonstração de nuvem exige a aplicação executando na VM criada por Azure CLI.
 
+**[Assistir à demonstração no YouTube](https://www.youtube.com/watch?v=KHZwnoqLOJQ)** · **[PDF da entrega de DevOps](docs/devops/entrega-devops.pdf)**
+
+A demonstração foi concluída: VM criada por Azure CLI, Docker instalado no Ubuntu, imagem construída na VM, container saudável e API acessível pelo IP público. Ao terminar, o grupo de recursos foi excluído, com confirmação de ausência do grupo e lista vazia de recursos restantes. O ambiente Azure não permanece ativo; o vídeo registra a execução e a limpeza.
+
 ### Docker: execução local e configuração
 
 > **[Guia Docker — preparação, build e execução](docs/devops/docker.md)**
@@ -169,7 +173,7 @@ Esta seção trata do empacotamento e da infraestrutura da mesma API Java. **Doc
 
 A API pode ser compilada e executada em container com Java 25, mantendo o Oracle externo do grupo. O Dockerfile usa múltiplos estágios e usuário sem privilégios administrativos; o Compose publica a API somente em `127.0.0.1:8081`, sem interferir na porta padrão do IntelliJ.
 
-Docker padroniza o empacotamento e a execução da API. Cloud Computing permitirá hospedar essa imagem em uma VM Azure, acessando o mesmo Oracle autorizado. Nenhum recurso de nuvem foi provisionado nesta etapa; a entrega DevOps ainda exige execução na VM criada por Azure CLI e seus materiais de comprovação.
+Docker padroniza o empacotamento da API e reúne a compilação e a execução em uma imagem reproduzível. Cloud Computing fornece a VM e a rede para executar essa imagem fora do computador de desenvolvimento. No NEXO, a VM Azure hospedou Docker e a API Java, enquanto o Oracle autorizado permaneceu externo na FIAP. Isso permitiu demonstrar a solução e remover a infraestrutura de nuvem sem incluir o banco nessa exclusão.
 
 #### Oracle e variáveis do container
 
@@ -206,8 +210,8 @@ Editar o `.env.azure` criado. O `cp -n` não sobrescreve uma configuração já 
 | `AZURE_SUBSCRIPTION_ID` | Sim | Copiar o ID da própria assinatura selecionada, conferido pelo comando acima |
 | `ADMIN_CIDR` | Sim | Informar o IPv4 público da conexão administrativa seguido de `/32`; não é o IP da futura VM |
 | `SSH_PUBLIC_KEY` | Preparar o arquivo | Gerar ou reutilizar uma chave própria. O padrão `$HOME/.ssh/nexo-azure.pub` pode ser mantido se o arquivo existir nesse caminho |
-| `AZURE_LOCATION` | Conferir | `chilecentral` é a primeira tentativa deste projeto, não uma garantia para outras contas. Usar região aceita pelo script e permitida na própria assinatura |
-| `AZURE_VM_SIZE` | Conferir | `Standard_B2als_v2` é a candidata econômica com 2 vCPUs e 4 GiB; depende da disponibilidade, quota e preço na região escolhida. Não existe substituição automática por modelo mais caro |
+| `AZURE_LOCATION` | Conferir | `chilecentral` foi a região da demonstração, não uma garantia para outras contas. Usar região aceita pelo script e permitida na própria assinatura |
+| `AZURE_VM_SIZE` | Conferir | `Standard_B2als_v2` foi o modelo configurado, com 2 vCPUs e 4 GiB. Uma nova execução depende de disponibilidade, quota e preço na região escolhida. Não existe substituição automática por modelo mais caro |
 | `AZURE_IMAGE` | Conferir | Manter a imagem Ubuntu 24.04 LTS x86-64 indicada no exemplo se estiver disponível. O instalador Docker exige essa distribuição e arquitetura; não trocar por outro sistema sem ajustar a instalação |
 | `AZURE_RESOURCE_GROUP` | Conferir | Manter `rg-nexo-devops` somente se o grupo não existir na assinatura. Para outro grupo dedicado, usar um sufixo, como `rg-nexo-devops-demo`; o script exige esse prefixo e não reutiliza grupos existentes |
 | `AZURE_VM_NAME` | Pode manter | `vm-nexo`, dentro do novo grupo dedicado |
@@ -245,9 +249,9 @@ set +a
 bash infra/scripts/provisionar-azure.sh --planejar
 ```
 
-O planejamento não chama a Azure nem comprova disponibilidade; apenas mostra os comandos com os parâmetros escolhidos. A criação efetiva e a instalação na VM estão separadas no [guia Azure](docs/devops/azure.md#execução-futura-com-autorização), exigem autorização para o gasto e ainda não foram demonstradas neste projeto. Quota, políticas, disponibilidade de VM/imagem e conectividade da VM ao Oracle podem impedir a execução em outra assinatura.
+O planejamento não chama a Azure nem comprova disponibilidade; apenas mostra os comandos com os parâmetros escolhidos. A criação efetiva e a instalação na VM estão separadas no [guia Azure](docs/devops/azure.md#provisionamento-com-autorização) e exigem autorização para o gasto. A execução demonstrada não garante quota, políticas, capacidade de VM/imagem ou acesso ao Oracle em outra assinatura ou em uma nova sessão.
 
-Após concluir a demonstração, usar [o procedimento de exclusão do grupo](docs/devops/azure.md#exclusão-e-comprovação). Ele remove os recursos desse grupo e verifica sua ausência; desligar a VM não substitui essa limpeza. Não colocar recursos alheios ao projeto no grupo dedicado. As opções de exclusão de disco, NIC e IP público não eliminam a necessidade de conferir resíduos de uma criação que falhou.
+Após concluir a demonstração, usar [o procedimento de exclusão do grupo](docs/devops/azure.md#exclusão-e-comprovação). Ele remove os recursos desse grupo e verifica sua ausência; desligar ou excluir somente a VM não substitui essa limpeza. O disco e a NIC são configurados para exclusão junto à VM, mas o IP público depende da exclusão do grupo inteiro. Não colocar recursos alheios ao projeto no grupo dedicado e conferir resíduos também quando uma criação falhar.
 
 ### Azure: provisionamento e exclusão
 
@@ -256,11 +260,11 @@ Os scripts `.sh` de criação da VM, instalação do Docker e exclusão do grupo
 - [Guia Azure, acesso à VM e comprovação da exclusão](docs/devops/azure.md)
 - [Parâmetros de exemplo, sem segredos](azure.env.example)
 
-A preparação foi validada localmente, com comandos Azure simulados e consultas reais somente de leitura. **Nenhum recurso Azure foi provisionado.** O deploy na VM, o acesso Azure → Oracle e a exclusão real ainda precisam ser demonstrados.
+A preparação foi verificada com testes locais de controle dos scripts e validação do Compose. A execução real na Azure e a exclusão do grupo estão registradas no [vídeo da demonstração](https://www.youtube.com/watch?v=KHZwnoqLOJQ). Os testes simulados verificam o controle dos scripts e não substituem essa evidência real.
 
 ### Arquitetura e demonstração
 
-![Arquitetura planejada do NEXO no Azure, com API em Docker e Oracle FIAP externo.](docs/devops/diagrama-arquitetura.png)
+![Arquitetura demonstrada do NEXO no Azure, com API em Docker e Oracle FIAP externo; recursos Azure excluídos após a demonstração.](docs/devops/diagrama-arquitetura.png)
 
 O [guia de arquitetura](docs/devops/arquitetura-devops.md) explica os componentes e apresenta o diagrama em PNG.
 

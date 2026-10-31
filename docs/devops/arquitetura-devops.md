@@ -1,12 +1,12 @@
 # Arquitetura DevOps do NEXO
 
-A API NEXO será executada em um container Docker dentro de uma VM Linux no Azure. O Oracle permanece no servidor da FIAP, com o schema compartilhado do grupo. Essa separação permite remover os recursos da demonstração sem excluir os dados do projeto.
+A API NEXO foi executada em um container Docker dentro de uma VM Linux no Azure. O Oracle permaneceu no servidor da FIAP, com o schema compartilhado do grupo. Essa separação permitiu remover os recursos da demonstração sem incluir o banco na exclusão.
 
-O desenho representa a arquitetura prevista nos scripts, com a primeira tentativa na região `chilecentral`. A VM ainda não foi provisionada, e a conexão Azure → Oracle continua pendente de validação.
+O desenho representa a arquitetura demonstrada em `chilecentral`. O vídeo registra a VM em execução, o container saudável e uma consulta de cenários com retorno de dados pelo IP público. Depois da demonstração, o grupo Azure foi excluído. O diagrama documenta esse ambiente, não um serviço que continua disponível.
 
 ## Diagrama
 
-![Arquitetura planejada do NEXO: acesso restrito ao Azure Public IP, NSG, interface de rede e VM Ubuntu com Docker e API, conectada ao Oracle FIAP externo.](diagrama-arquitetura.png)
+![Arquitetura demonstrada do NEXO: acesso restrito ao Azure Public IP, NSG, interface de rede e VM Ubuntu com Docker e API, conectada ao Oracle FIAP externo. Recursos Azure excluídos ao término.](diagrama-arquitetura.png)
 
 - [Abrir a imagem PNG](diagrama-arquitetura.png)
 
@@ -26,7 +26,7 @@ O diagrama em PNG inclui os ícones e os nomes dos serviços Azure e é utilizad
 | API NEXO | Usa Java 25, Spring Boot e JPA, com porta interna 8080 e usuário sem privilégios administrativos |
 | Oracle FIAP | Mantém as tabelas e os dados do grupo fora da VM Azure |
 
-A candidata é `Standard_B2als_v2`, com 2 vCPUs e 4 GiB de RAM, mais barata que a candidata Intel equivalente entre os preços comparados na região. O disco de sistema previsto tem 32 GiB e usa Standard HDD LRS para reduzir o custo da demonstração. A disponibilidade do modelo ainda precisa ser confirmada; não há troca automática por uma VM mais cara.
+O modelo configurado foi `Standard_B2als_v2`, com 2 vCPUs e 4 GiB de RAM, mais barato que a candidata Intel equivalente entre os preços comparados na região. O disco de sistema foi configurado com 32 GiB e Standard HDD LRS. A disponibilidade para uma nova execução precisa ser consultada novamente; não há troca automática por uma VM mais cara.
 
 ## Como os componentes se comunicam
 
@@ -44,11 +44,11 @@ O disco mostrado pertence ao sistema operacional da VM, não ao Oracle. O Compos
 
 Isso não substitui uma política de backup do banco. A exclusão remove os arquivos que estiverem na VM, então as evidências da entrega precisam ser copiadas antes da limpeza.
 
-O script configura a exclusão do disco de sistema, da NIC e do IP público associado junto à VM. A limpeza final remove todo o grupo de recursos, incluindo VNet e NSG, e só confirma sucesso após verificar que o grupo está ausente e a consulta de recursos restantes está vazia.
+O script configura a exclusão do disco de sistema e da NIC junto à VM. O IP público não tem exclusão automática configurada; sua limpeza é feita pela exclusão de todo o grupo de recursos, que também remove VNet e NSG. A limpeza só confirma sucesso após verificar que o grupo está ausente e a consulta de recursos restantes está vazia. Excluir somente a VM não substitui esse procedimento.
 
-## Atualização para a gravação
+## Evidências e reprodução
 
-Depois de validar a implantação, conferir os nomes, a região, o modelo da VM e as portas efetivamente usados. Só então substituir a indicação de implantação pendente pela identificação da arquitetura demonstrada. Se o deploy mudar, atualizar o desenho e os guias antes de gravar.
+A [demonstração em vídeo](https://www.youtube.com/watch?v=KHZwnoqLOJQ) registra provisionamento, instalação, build, consultas HTTP e exclusão do grupo. Não foi demonstrada uma restauração do banco nem a exclusão em cascata do IP ao apagar somente a VM.
 
 Os parâmetros estão em [azure.env.example](../../azure.env.example), e os comandos de implantação estão no [guia Azure](azure.md).
 
