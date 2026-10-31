@@ -82,8 +82,8 @@ As entidades não são expostas diretamente nas respostas HTTP. A API usa DTOs d
 
 - Classes: [Cenario](../../src/main/java/br/com/fiap/nexo/cenario/Cenario.java), [Alternativa](../../src/main/java/br/com/fiap/nexo/alternativa/Alternativa.java), [Decisao](../../src/main/java/br/com/fiap/nexo/decisao/Decisao.java) e [MitoFato](../../src/main/java/br/com/fiap/nexo/mitofato/MitoFato.java).
 - Enums: [Categoria](../../src/main/java/br/com/fiap/nexo/cenario/Categoria.java) e [Classificacao](../../src/main/java/br/com/fiap/nexo/mitofato/Classificacao.java).
-- [Contrato Oracle](../../README.md#banco-oracle) · [DDL](sql/schema-oracle.sql) · [Contrato HTTP](../../README.md#java-advanced) · [Dados de teste](../../README.md#dados-para-teste).
-- [Checklist de entrega Java](../../README.md#java-advanced) · [README do projeto](../../README.md).
+- [Estrutura Oracle](sql/schema-oracle.sql) · [Executar a API](../../README.md#executar-a-api) · [Dados para teste](../../README.md#dados-para-teste).
+- [README do projeto](../../README.md).
 
 ## Diagrama Mermaid
 

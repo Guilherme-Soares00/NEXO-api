@@ -51,108 +51,81 @@ Para conferir as ferramentas, conforme a opção escolhida: `java -version`, `mv
 
 ## Java Advanced
 
-Esta seção apresenta a implementação e a execução da API Java: modelo, persistência, endpoints, validações, segurança e testes. **Docker, assinatura Azure e chave SSH não são requisitos para executar a API pelo IntelliJ/Maven.** O acesso a um Oracle preparado é necessário para iniciar a aplicação, mas não para executar os testes locais.
+API REST em Java 25, Spring Boot 3.5.16, Spring MVC, Spring Data JPA e Oracle. Oferece CRUD de cenários, alternativas, decisões e mitos/fatos, busca parcial por título e paginação. Controllers recebem DTOs validados; serviços aplicam regras e transações; repositories fazem a persistência. Erros são retornados em JSON.
 
-### Tecnologias e funcionamento
+- **Modelo:** [modelagem Java e diagrama de classes](docs/java/README.md).
+- **Documentação dos endpoints:** [Swagger UI](http://localhost:8080/swagger-ui/index.html) e [OpenAPI JSON](http://localhost:8080/v3/api-docs), disponíveis com a API iniciada.
+- **Recursos:** `/cenarios`, `/alternativas`, `/decisoes` e `/mitos-fatos`. A busca usa `/cenarios/busca?texto=energia&page=0&size=10`; o jogo, `/cenarios/{id}/jogo`.
 
-Java 25, Spring Boot 3.5.16, Spring MVC, Spring Data JPA, Oracle JDBC e springdoc 2.9.1. Controllers recebem DTOs validados; serviços controlam transações; repositories Spring Data JPA fazem leituras e escritas nas quatro entidades.
+### Banco Oracle
 
-A API oferece CRUD de cenários, alternativas, decisões e mitos/fatos, busca parcial pelo título e paginação. Também permite consultar e cadastrar alternativas de um cenário, valida os rótulos A/B e devolve erros JSON padronizados. As entidades JPA não são expostas diretamente nas respostas.
+A aplicação usa as tabelas `NEXO_CENARIO`, `NEXO_ALTERNATIVA`, `NEXO_DECISAO` e `NEXO_MITO_FATO`, com as quatro sequences `SEQ_NEXO_*`. Não cria objetos ou dados automaticamente e não depende de procedures/functions para o CRUD.
 
-Os recursos estão organizados em pacotes de domínio, com DTOs, controllers, serviços e repositories. As configurações compartilhadas ficam em `configuration/`; validações e tratamento de erros comuns, em `shared/`.
-
-Enunciado vigente: Challenge de tecnologia nuclear, Sprint 1, páginas 33–36 para Java. Na página 38, Database adia procedures, functions com cursor e sua integração para a Sprint 2. O CRUD Java atual não depende dessas rotinas.
-
-Oracle é o perfil padrão. A aplicação não cria tabelas, sequences ou dados. Para instalação manual em schema próprio sem objetos NEXO, usar [docs/java/sql/schema-oracle.sql](docs/java/sql/schema-oracle.sql). O schema deve atender a [README.md#banco-oracle](README.md#banco-oracle). IDs usam as sequences existentes com allocationSize=1; DATA_ESCOLHA continua sendo gerada no banco e preservada no PUT.
-
-### Alinhamento com o Oracle 19c
-
-Tabelas NEXO_CENARIO, NEXO_ALTERNATIVA, NEXO_DECISAO e NEXO_MITO_FATO. Mito ou Fato pertence ao cenário e é compartilhado por A/B. Não há campo de ordenação no modelo. Situação e feedback aceitam até 1000 caracteres; apelidos, de 3 a 50. DATA_ESCOLHA é data/hora local sem fuso, gerada no Oracle, sem conversão para UTC.
-
-CRUD de mitos/fatos em /mitos-fatos; consulta por cenário em /cenarios/{id}/mitos-fatos. GET /cenarios/{id}/jogo exige A, B e ao menos um item de descoberta. O CRUD comum permite montar o conteúdo gradualmente. Estrutura e requisitos do schema em [README.md#banco-oracle](README.md#banco-oracle).
-
-### Testes e resultados
-
-Requisitos: JDK 25 e Maven compatível. Conferir com `java -version` e `mvn -version`.
-
-```text
-mvn test
-mvn verify
-```
-
-Esses comandos executam os testes locais sem abrir conexão com Oracle e empacotam o projeto quando aplicável. O perfil de integração é explícito:
-
-```text
-mvn verify -Poracle-it
-```
-
-A integração exige schema Oracle de testes separado e vazio. Na execução registrada, `mvn -B -ntp clean verify -Poracle-it` passou com 145 testes locais e 144 testes Oracle, sem falhas, erros ou ignorados. A API empacotada também passou por 46 verificações HTTP reais, incluindo persistência confirmada por outra conexão JDBC. Os testes removem somente os IDs que criam; as quatro tabelas ficaram vazias ao final. Evidências e limites em [README.md#testes-e-resultados](README.md#testes-e-resultados).
-
-Na atualização dos dados educativos, `mvn verify` foi executado novamente: **146 testes locais aprovados**, sem falhas. As duas coleções Postman também passaram no Newman contra Oracle real, conforme [README.md#dados-para-teste](README.md#dados-para-teste). Os 144 testes de integração Oracle citados acima pertencem à execução anterior.
-
-Na conferência final, `mvn -B -ntp clean verify` aprovou **148 testes locais**, após a correção do cabeçalho `Allow` nas respostas 405. A imagem Docker foi reconstruída e passou por 16 verificações HTTP de leitura contra o Oracle externo. Não houve nova execução de `oracle-it` nem escrita no schema compartilhado; detalhes em [README.md#testes-e-resultados](README.md#testes-e-resultados).
+Para instalar em **schema próprio vazio**, usar [o script de estrutura Oracle](docs/java/sql/schema-oracle.sql). Não executar esse script sobre o schema compartilhado do grupo. IDs são gerados por sequence com `allocationSize=1`; a data da decisão vem de `DEFAULT LOCALTIMESTAMP` e é preservada nas atualizações. Exclusões respeitam as dependências entre os registros.
 
 ### Executar a API
 
-Na conferência complementar, o build limpo da versão local atual aprovou **148 testes**, sem falhas. O CRUD das quatro entidades e as duas coleções Postman também passaram no Oracle do grupo, com os dados existentes integralmente preservados após a limpeza dos registros de teste. As sequences puderam avançar, conforme autorização; não foram reiniciadas. Resultados e distinção entre versão local e publicada em [README.md#testes-e-resultados](README.md#testes-e-resultados).
-
-Configure as variáveis abaixo no ambiente do processo:
+Requisitos: JDK 25, Maven e acesso autorizado a um Oracle preparado. Configure as variáveis no ambiente do processo:
 
 | Variável | Conteúdo |
 | --- | --- |
-| `ORACLE_JDBC_URL` | URL JDBC da conexão autorizada |
+| `ORACLE_JDBC_URL` | URL JDBC do Oracle autorizado |
 | `APP_USER` | Usuário do schema |
 | `APP_USER_PASSWORD` | Senha desse usuário |
 | `NEXO_ADMIN_TOKEN` | Token aleatório de 64 caracteres hexadecimais |
 
-O arquivo [.env.example](.env.example) contém somente exemplos. Spring Boot não carrega o `.env` automaticamente. No IntelliJ, selecione o arquivo local em **Run → Edit Configurations → NexoApplication → Environment variables** e configure a senha localmente. Mantenha **Store as project file** desmarcado. Fora da IDE, forneça as variáveis ao terminal/processo. O `.env` e a pasta `.idea/` são ignorados pelo Git; não publique credenciais.
-
-Depois de preparar o banco e as variáveis, execute `NexoApplication` pelo IntelliJ ou use:
+O arquivo [.env.example](.env.example) contém apenas exemplos. Spring Boot **não carrega `.env` automaticamente**. No IntelliJ, configure o ambiente de `NexoApplication` em **Run → Edit Configurations → Environment variables**, sem compartilhar a configuração ou publicar credenciais. Pelo terminal, forneça as variáveis ao processo e execute:
 
 ```text
 mvn spring-boot:run
 ```
 
-O endereço padrão é 127.0.0.1:8080. SERVER_ADDRESS e SERVER_PORT permitem configuração explícita.
-
-- [Swagger UI](http://localhost:8080/swagger-ui/index.html)
-- [OpenAPI JSON](http://localhost:8080/v3/api-docs)
-
-Uma consulta pública, sem token:
+A API inicia em `127.0.0.1:8080`; `SERVER_ADDRESS` e `SERVER_PORT` permitem alterar o endereço e a porta. Uma consulta pública:
 
 ```text
 curl "http://localhost:8080/cenarios/busca?texto=energia&page=0&size=10"
 ```
 
-Para executar o pacote gerado por `mvn package`, no ambiente configurado:
-
-```text
-java -jar target/nexo-0.0.1-SNAPSHOT.jar
-```
-
-Configuração Windows e testes Oracle: [README.md#executar-a-api](README.md#executar-a-api).
-
 ### Administração protegida
 
-Catálogo e POST /decisoes são públicos. Alterações de conteúdo e consulta, alteração ou exclusão de decisões exigem o cabeçalho `Authorization: Bearer <token>`, correspondente a `NEXO_ADMIN_TOKEN` no ambiente. A aplicação exige um token válido para iniciar. Não há tabela de usuários, login ou JWT.
+O catálogo e `POST /decisoes` são públicos. Escritas de conteúdo e leitura, alteração ou exclusão de decisões exigem `Authorization: Bearer <token>`, com o mesmo valor de `NEXO_ADMIN_TOKEN`. Não há contas individuais, login ou JWT. A aplicação não inicia sem um token válido.
 
-Geração local do token, matriz de acesso, Swagger, Postman, rotação e limites: [README.md#administração-protegida](README.md#administração-protegida). Nunca enviar o token por HTTP público nem embuti-lo em aplicativos distribuídos. HTTPS/túnel seguro e proteção contra abuso devem ser definidos antes da exposição remota.
+Para gerar o token no ambiente de uma sessão **PowerShell**, sem imprimi-lo ou gravá-lo em arquivo:
 
-### Documentação e dados para teste
+```powershell
+$bytes = New-Object byte[] 32
+$random = [System.Security.Cryptography.RandomNumberGenerator]::Create()
+try {
+    $random.GetBytes($bytes)
+    $env:NEXO_ADMIN_TOKEN = -join ($bytes | ForEach-Object { $_.ToString('x2') })
+} finally {
+    $random.Dispose()
+    [Array]::Clear($bytes, 0, $bytes.Length)
+}
+```
 
-- [Produto](README.md)
-- [Contrato HTTP](README.md#java-advanced)
-- [Contrato Oracle](README.md#banco-oracle)
-- [Arquitetura MVC](README.md#java-advanced)
-- [Requisitos](README.md#java-advanced)
-- [Checklist Java Sprint 1](README.md#java-advanced)
-- [Qualidade](README.md#testes-e-resultados)
-- [Segurança e simplicidade](README.md#administração-protegida)
-- [Autenticação administrativa](README.md#administração-protegida)
-- [Histórico de evidências](README.md#testes-e-resultados)
-- [Fontes institucionais](README.md#dados-para-teste)
+Inicie a aplicação nessa mesma sessão após configurar as variáveis Oracle. No Swagger, use **Authorize → adminToken** e informe somente o token, sem o prefixo `Bearer`. Não publique o valor nem o envie pela internet em HTTP simples; use HTTPS ou túnel seguro para administração remota.
 
-A coleção [requests/NEXO.postman_collection.json](requests/NEXO.postman_collection.json) acompanha o CRUD, captura IDs e exclui os registros de exemplo ao terminar. Para manter os dados de teste, usar [requests/NEXO.dados-teste.postman_collection.json](requests/NEXO.dados-teste.postman_collection.json): cria um cenário, alternativas A/B, um Mito ou Fato e uma decisão fictícia, sem limpeza automática. O exemplo de Saúde contém um cenário educativo específico, alternativas fundamentadas em fontes AIEA/FDA e um Fato sobre esterilização por radiação. As duas coleções foram executadas via Newman com Oracle real: carga de demonstração com 8 requisições e 18 asserções; CRUD com 29 requisições e 45 asserções, sem falhas. Os dados de demonstração foram mantidos. Esse exemplo não substitui a carga DML de Database nem um catálogo de todas as categorias. Consulte [README.md#dados-para-teste](README.md#dados-para-teste).
+### Dados para teste
+
+Importe uma destas coleções no Postman:
+
+- [CRUD completo](requests/NEXO.postman_collection.json): percorre os quatro recursos e exclui os registros que criou ao terminar.
+- [Dados de demonstração](requests/NEXO.dados-teste.postman_collection.json): cria cenário de Saúde, alternativas A/B, um Fato e uma decisão fictícia; **mantém os registros no banco**.
+
+Defina `baseUrl` para a API autorizada e `adminToken` como variável secreta em ambiente local do Postman. Execute uma iteração na ordem, interrompendo em caso de falha. Os IDs são capturados das respostas; não precisam ser fixados manualmente. Repetir a carga de demonstração cria novos registros, portanto só a execute quando houver autorização para alterar o banco.
+
+O exemplo aborda esterilização de produtos médicos e usa fontes da [AIEA](https://www.iaea.org/topics/medical-sterilization) e da [FDA](https://www.fda.gov/medical-devices/general-hospital-devices-and-supplies/sterilization-medical-devices). O conteúdo é educativo, com participantes e decisões fictícios.
+
+### Testes e resultados
+
+```text
+mvn verify
+```
+
+Executa os testes locais sem exigir Oracle, Docker ou Azure e gera o pacote em `target/`. A última verificação do código aprovou **148 testes locais**, sem falhas.
+
+A integração opcional usa `mvn verify -Poracle-it` e exige **schema de testes separado e inicialmente vazio**, configurado por `ORACLE_TEST_JDBC_URL`, `ORACLE_TEST_USER` e `ORACLE_TEST_PASSWORD`. Não executar esse perfil no banco compartilhado nem sobre os dados de apresentação.
 
 ---
 
@@ -181,7 +154,7 @@ Docker padroniza o empacotamento da API e reúne a compilação e a execução e
 
 #### Oracle e variáveis do container
 
-O Oracle é externo: **o Compose não instala banco nem cria o schema**. É necessário acesso autorizado ao schema do grupo ou a um Oracle próprio preparado conforme o [contrato do banco](README.md#banco-oracle). O script de estrutura indicado nesse contrato só deve ser executado em um schema próprio apropriado, nunca automaticamente no banco compartilhado. Não executar `-Poracle-it` nesse schema compartilhado: a suíte exige um schema de testes separado e vazio.
+O Oracle é externo: **o Compose não instala banco nem cria o schema**. É necessário acesso autorizado ao schema do grupo ou a um Oracle próprio preparado conforme o [script de estrutura Oracle](docs/java/sql/schema-oracle.sql). Esse script de estrutura só deve ser executado em um schema próprio apropriado, nunca automaticamente no banco compartilhado. Não executar `-Poracle-it` nesse schema compartilhado: a suíte exige um schema de testes separado e vazio.
 
 Para Docker, copiar `docker.env.example` para `.env.docker` e preencher:
 
