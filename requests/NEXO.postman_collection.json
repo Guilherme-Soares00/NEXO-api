@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "8eb4b622-27be-4d8d-a9f1-74a4159e6df2",
     "name": "NEXO API",
-    "description": "Exemplo técnico encadeado de CRUD para as quatro tabelas do PDF de estrutura. Conteúdo e fontes ainda aguardam conferência no módulo DADOS; não é o catálogo final. Cria registros fictícios e os exclui ao terminar. Requer Oracle com as doze procedures compatíveis. Administração exige token Bearer. Configure adminToken somente em um ambiente local do Postman, como segredo; não exporte esse valor. Catálogo e POST /decisoes são públicos e não enviam token.",
+    "description": "Exemplo encadeado de CRUD das quatro entidades do NEXO, com dados educativos fictícios sobre esterilização de produtos médicos e fontes AIEA/FDA. Cria registros próprios e os exclui ao terminar; não substitui a carga de apresentação nem a entrega de Database. Usa Spring Data JPA e exige Oracle com tabelas, constraints e sequences compatíveis, sem depender de procedures ou functions. Administração exige token Bearer. Configure adminToken somente em um ambiente local do Postman, como segredo; não exporte esse valor. Catálogo e POST /decisoes são públicos e não enviam token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [

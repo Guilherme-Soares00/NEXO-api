@@ -61,7 +61,7 @@ A API oferece CRUD de cenários, alternativas, decisões e mitos/fatos, busca pa
 
 Os recursos estão organizados em pacotes de domínio, com DTOs, controllers, serviços e repositories. As configurações compartilhadas ficam em `configuration/`; validações e tratamento de erros comuns, em `shared/`.
 
-Enunciado vigente: `2TDS Agosto - Marinha 2026 - 1º Semestre V2.pdf`, páginas 33–36 para Java. Na página 38, Database adia procedures, functions com cursor e sua integração para a Sprint 2. O CRUD Java atual não depende dessas rotinas.
+Enunciado vigente: Challenge de tecnologia nuclear, Sprint 1, páginas 33–36 para Java. Na página 38, Database adia procedures, functions com cursor e sua integração para a Sprint 2. O CRUD Java atual não depende dessas rotinas.
 
 Oracle é o perfil padrão. A aplicação não cria tabelas, sequences ou dados. Para instalação manual em schema próprio sem objetos NEXO, usar [docs/java/sql/schema-oracle.sql](docs/java/sql/schema-oracle.sql). O schema deve atender a [README.md#banco-oracle](README.md#banco-oracle). IDs usam as sequences existentes com allocationSize=1; DATA_ESCOLHA continua sendo gerada no banco e preservada no PUT.
 
@@ -90,7 +90,11 @@ A integração exige schema Oracle de testes separado e vazio. Na execução reg
 
 Na atualização dos dados educativos, `mvn verify` foi executado novamente: **146 testes locais aprovados**, sem falhas. As duas coleções Postman também passaram no Newman contra Oracle real, conforme [README.md#dados-para-teste](README.md#dados-para-teste). Os 144 testes de integração Oracle citados acima pertencem à execução anterior.
 
+Na conferência final, `mvn -B -ntp clean verify` aprovou **148 testes locais**, após a correção do cabeçalho `Allow` nas respostas 405. A imagem Docker foi reconstruída e passou por 16 verificações HTTP de leitura contra o Oracle externo. Não houve nova execução de `oracle-it` nem escrita no schema compartilhado; detalhes em [README.md#testes-e-resultados](README.md#testes-e-resultados).
+
 ### Executar a API
+
+Na conferência complementar, o build limpo da versão local atual aprovou **148 testes**, sem falhas. O CRUD das quatro entidades e as duas coleções Postman também passaram no Oracle do grupo, com os dados existentes integralmente preservados após a limpeza dos registros de teste. As sequences puderam avançar, conforme autorização; não foram reiniciadas. Resultados e distinção entre versão local e publicada em [README.md#testes-e-resultados](README.md#testes-e-resultados).
 
 Configure as variáveis abaixo no ambiente do processo:
 
@@ -141,7 +145,7 @@ Geração local do token, matriz de acesso, Swagger, Postman, rotação e limite
 - [Contrato Oracle](README.md#banco-oracle)
 - [Arquitetura MVC](README.md#java-advanced)
 - [Requisitos](README.md#java-advanced)
-- [Checklist Java Sprint 1 V2](README.md#java-advanced)
+- [Checklist Java Sprint 1](README.md#java-advanced)
 - [Qualidade](README.md#testes-e-resultados)
 - [Segurança e simplicidade](README.md#administração-protegida)
 - [Autenticação administrativa](README.md#administração-protegida)

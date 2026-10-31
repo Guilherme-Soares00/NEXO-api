@@ -70,8 +70,10 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
-    public ResponseEntity<ApiError> methodNotAllowed(Exception ex, HttpServletRequest request) {
-        return response(HttpStatus.METHOD_NOT_ALLOWED, "Método HTTP não permitido.", request, List.of());
+    public ResponseEntity<ApiError> methodNotAllowed(HttpRequestMethodNotSupportedException ex, HttpServletRequest request) {
+        ResponseEntity<ApiError> response = response(HttpStatus.METHOD_NOT_ALLOWED,
+                "Método HTTP não permitido.", request, List.of());
+        return ResponseEntity.status(response.getStatusCode()).headers(ex.getHeaders()).body(response.getBody());
     }
 
     @ExceptionHandler(HttpMediaTypeNotSupportedException.class)

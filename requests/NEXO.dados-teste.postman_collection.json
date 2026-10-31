@@ -1,7 +1,7 @@
 {
   "info": {
-    "name": "NEXO — Dados de teste Java Sprint 1 V2",
-    "description": "Demonstração educativa Java Sprint 1 V2: esterilização industrial de produtos médicos, com fontes AIEA e FDA. Cria um cenário, alternativas A/B, um Fato e uma decisão fictícia, sem exclusão automática. Executar uma iteração em ambiente autorizado; repetir cria novos registros. Definir adminToken somente no ambiente local do Postman. Não substitui a carga DML da disciplina Database.",
+    "name": "NEXO — Dados de teste Java Sprint 1",
+    "description": "Demonstração educativa Java Sprint 1: esterilização industrial de produtos médicos, com fontes AIEA e FDA. Cria um cenário, alternativas A/B, um Fato e uma decisão fictícia, sem exclusão automática. Executar uma iteração em ambiente autorizado; repetir cria novos registros. Definir adminToken somente no ambiente local do Postman. Não substitui a carga DML da disciplina Database.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
