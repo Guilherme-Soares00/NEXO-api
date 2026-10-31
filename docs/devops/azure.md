@@ -1,13 +1,13 @@
-# Azure — scripts preparados, provisionamento ainda não executado
+# Azure — provisionamento, execução e exclusão
 
-> Os scripts e este guia foram preparados sem criar recursos Azure. A execução real continua dependendo de autorização separada, conferência de custos e disponibilidade. Não execute o bloco de criação apenas para testar os arquivos.
+> A demonstração foi concluída e o grupo de recursos foi excluído. O [vídeo](https://www.youtube.com/watch?v=KHZwnoqLOJQ) registra provisionamento por CLI, Docker na VM, API em funcionamento e limpeza final. Para reproduzir, configurar o próprio ambiente e autorizar separadamente os custos. Não executar o provisionamento apenas para verificar os arquivos.
 
 ## Navegação
 
 - [O que será criado](#o-que-será-criado)
 - [Preparação local sem provisionar](#preparação-local-sem-provisionar)
 - [Planejamento seguro](#planejamento-seguro)
-- [Execução futura com autorização](#execução-futura-com-autorização)
+- [Provisionamento com autorização](#provisionamento-com-autorização)
 - [Docker e API na VM](#docker-e-api-na-vm)
 - [Acesso e demonstração](#acesso-e-demonstração)
 - [Exclusão e comprovação](#exclusão-e-comprovação)
@@ -19,7 +19,7 @@
 | --- | --- |
 | `azure.env.example` | Parâmetros não secretos do provisionamento |
 | `infra/scripts/provisionar-azure.sh` | Grupo, rede, NSG, IP público, NIC e VM por Azure CLI |
-| `infra/scripts/instalar-docker.sh` | Docker Engine, Buildx, Compose e Git na futura VM Ubuntu |
+| `infra/scripts/instalar-docker.sh` | Docker Engine, Buildx, Compose e Git na VM Ubuntu |
 | `infra/scripts/excluir-recursos.sh` | Exclusão do grupo dedicado com conferência posterior |
 | `infra/docker-compose.azure.yml` | Trocar somente a publicação de porta ao executar na VM |
 | `.gitattributes` | Preservar LF nos scripts Bash e no exemplo de ambiente Azure |
@@ -38,11 +38,11 @@ Computador administrativo
 
 O [diagrama com ícones Azure](arquitetura-devops.md) apresenta essa mesma estrutura em uma versão indicada para o README, o vídeo e o PDF.
 
-Padrões: grupo `rg-nexo-devops`, VM `vm-nexo`, região `chilecentral`, candidata `Standard_B2als_v2`, disco Standard HDD LRS de 32 GiB e usuário SSH `nexoadmin`. A VM não possui autenticação por senha. Não há Oracle em container, Azure SQL, NAT Gateway ou outros serviços pagos adicionais previstos nos scripts.
+Configuração da demonstração: grupo `rg-nexo-devops`, VM `vm-nexo`, região `chilecentral`, modelo `Standard_B2als_v2`, disco Standard HDD LRS de 32 GiB e usuário SSH `nexoadmin`. O acesso à VM usa chave SSH, não senha. Não há Oracle em container, Azure SQL, NAT Gateway ou outros serviços pagos adicionais previstos nos scripts.
 
 Somente SSH e a porta HTTP da API recebem regras personalizadas de entrada. Ambas são restritas ao IPv4 administrativo com máscara `/32`; o script rejeita `0.0.0.0/0`. As regras padrão do NSG continuam existindo. O listener Oracle não é exposto nessa VM.
 
-A candidata tem 2 vCPUs e 4 GiB, pois hospeda API e Docker, não o Oracle. Priorizar o menor custo compatível com essa execução e conferir os preços na região escolhida. As consultas anteriores de quota e imagem foram em `eastus`; elas não comprovam disponibilidade em `chilecentral`. SKU, imagem e alocação nessa região continuam pendentes.
+O modelo configurado tem 2 vCPUs e 4 GiB e hospeda API e Docker, não o Oracle. O provisionamento em `chilecentral` foi demonstrado, mas uma execução anterior bem-sucedida não reserva capacidade nem garante quota em outra assinatura. Conferir disponibilidade e preços novamente antes de criar recursos.
 
 ## Preparação local sem provisionar
 
@@ -60,8 +60,8 @@ Editar `.env.azure` localmente. Esse arquivo é ignorado pelo Git; não colocar 
 | --- | --- |
 | `AZURE_SUBSCRIPTION_ID` | ID exato da assinatura da faculdade |
 | `AZURE_RESOURCE_GROUP` | Grupo dedicado; manter `rg-nexo-devops` ou um sufixo alfanumérico |
-| `AZURE_LOCATION` | `chilecentral`, escolhida para a primeira tentativa, dentro da política observada |
-| `AZURE_VM_SIZE` | `Standard_B2als_v2`, menor preço entre as candidatas comparadas com 2 vCPUs e 4 GiB; disponibilidade pendente |
+| `AZURE_LOCATION` | `chilecentral`, usada na demonstração; conferir a política da própria assinatura |
+| `AZURE_VM_SIZE` | `Standard_B2als_v2`, menor preço entre as candidatas comparadas com 2 vCPUs e 4 GiB; revalidar disponibilidade antes de uma nova execução |
 | `ADMIN_CIDR` | IPv4 público da rede administrativa seguido de `/32` |
 | `SSH_PUBLIC_KEY` | Caminho do arquivo de chave pública, terminado em `.pub` |
 | `AZURE_API_PORT` | `8080`, igual à porta publicada futuramente na VM |
@@ -104,7 +104,7 @@ Todos assumem `--planejar` quando nenhum argumento é informado. O provisionamen
 
 Não existe login automático, execução no carregamento do arquivo ou criação automática de chave SSH. O fato de um plano exibir `az ... create` não significa que o comando foi executado.
 
-## Execução futura com autorização
+## Provisionamento com autorização
 
 **Somente quando os custos e a sessão de execução forem aprovados:**
 
@@ -118,7 +118,7 @@ A consulta de SKUs pode demorar. Se houver erro ou timeout, interromper e invest
 
 O script cria um grupo dedicado com tags `projeto=NEXO` e `finalidade=devops-sprint1`, uma VNet/subnet, NSG e duas regras, IP público, NIC e VM. A NIC já existente é fornecida ao comando de criação da VM, evitando uma segunda rede implícita. Não usa `az vm open-port`.
 
-O provisionamento define `Delete` para o disco do sistema e a NIC na criação da VM. Também configura `Delete` no IP público associado à NIC, antes de criar a VM. As propriedades são consultadas novamente: sem confirmação do IP, a VM não é criada; sem confirmação do disco e da NIC, o script não anuncia a proteção como concluída.
+O provisionamento define `Delete` para o disco do sistema e a NIC na criação da VM e consulta essas propriedades novamente antes de anunciar a proteção como concluída. O IP público não tem exclusão automática configurada e sua limpeza depende da exclusão do grupo inteiro com `infra/scripts/excluir-recursos.sh`. Excluir somente a VM pode deixar o IP público e outros recursos no grupo, consumindo créditos.
 
 Essas opções são para a exclusão da VM, não para desligamento ou desalocação. Elas não apagam VNet, NSG nem recursos adicionados depois. A limpeza final continua sendo a exclusão de todo o grupo dedicado pelo script apropriado.
 
@@ -237,12 +237,14 @@ O primeiro comando deve retornar `false`; o segundo não deve listar recursos do
 - O modo padrão dos três scripts foi executado localmente e não realizou chamadas Azure nem instalação.
 - Caminhos de criação e exclusão foram exercitados com uma função `az` simulada, sem acesso ao serviço real.
 - Testes cobriram confirmação ausente, ID inválido, origem irrestrita, assinatura diferente, grupo existente, SKU restrito, tags incorretas e ausência de confirmação real de exclusão.
-- Testes locais adicionais cobriram o padrão `chilecentral`, as opções `Delete`, a interrupção diante de proteção não confirmada e a recusa de anunciar limpeza enquanto houver recursos listados. As respostas Azure desses testes foram simuladas, não constituem uma validação do comportamento no serviço real.
+- Testes locais adicionais cobriram o padrão `chilecentral`, as opções `Delete` do disco e da NIC, o provisionamento sem depender de exclusão automática do IP e a recusa de anunciar limpeza enquanto houver recursos listados. As respostas Azure desses testes foram simuladas, não constituem uma validação do provisionamento completo no serviço real.
 - O fluxo do instalador foi exercitado em container Ubuntu 24.04 descartável, com apt, download, systemctl e Docker simulados; nenhum pacote foi instalado nesse teste.
 - O Docker Compose validou o merge e confirmou que somente a porta da API muda, sem alterar as variáveis de conexão ou acrescentar banco.
-- Consultas reais de leitura confirmaram assinatura ativa, política de regiões, quota e imagem. A consulta de SKUs expirou, portanto sua disponibilidade permanece pendente.
-- Nenhuma VM, rede, grupo ou outro recurso Azure foi criado, alterado ou excluído neste módulo.
-- A instalação real de Docker na VM, a execução da API na Azure, a conectividade Azure → Oracle, a gravação e a exclusão real ainda não foram feitas.
+- Consultas reais confirmaram assinatura ativa, política de regiões e imagem. A consulta de SKUs permitiu avançar nas tentativas de provisionamento, mas isso não comprova capacidade de alocação da VM.
+- A execução real registrada no vídeo mostra a VM criada por Azure CLI, Docker instalado no Ubuntu, build na VM, container `healthy` e usuário da aplicação sem privilégios administrativos.
+- As consultas de catálogo pelo IP público retornaram `200`, incluindo dados de cenários; a consulta administrativa sem token retornou `401`. O healthcheck de cenários e a resposta da API demonstram uma leitura do Oracle a partir da aplicação na VM, não um teste de escrita ou de todos os contratos do banco.
+- O grupo foi excluído ao término, com mensagem de confirmação, `az group exists` retornando `false` e lista de recursos restantes vazia. O vídeo comprova a limpeza de todo o grupo, não exclusão automática do IP ao apagar somente a VM.
+- O grupo já não mantém uma API disponível. Para reproduzir, é necessário novo provisionamento autorizado, assinatura própria e acesso permitido ao Oracle.
 
 ## Fontes oficiais
 
