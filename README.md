@@ -22,8 +22,8 @@ Turma: 2TDSPB
 | Integrante | RM |
 | --- | --- |
 | Luis Fillipe Rodrigues Seripieri | 567918 |
-| Gabriel Rocha de Souza | 567726 |
-| Luiz Kichimoto Valdevino | 567023 |
+| Gabriel Rocha de Souza | 567023 |
+| Luiz Kichimoto Valdevino | 567726 |
 | Guilherme Soares | 568227 |
 | Gabriel Stuani | 566682 |
 
